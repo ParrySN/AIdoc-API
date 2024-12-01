@@ -177,8 +177,12 @@ def get_table(channel,province):
                 "oscc": 0
             },
             "dentist_diagnose": {
-                "agree": 0,
-                "disagree": 0
+                "normal": 0,
+                "not_diagnosed": 0,
+                "opmd": 0,
+                "oscc": 0,
+                "others": 0,
+                "poor_image": 0
             },
             "total_pic": 0
         }
@@ -189,7 +193,6 @@ def get_table(channel,province):
         # Close Connection
         connection.close()
     
-    # Return Output
     return output
 
 def mapAiPrediction(prediction):
