@@ -63,6 +63,7 @@ def report(role, province):
         else:
             # In case no valid accuracy values are provided, set accuracy to "-"
             output['patient_and_osm']['total']['accuracy'] = "-"
+        output['patient_and_osm']['total']['total_pic'] = sum([osm['total_pic'], patient['total_pic']])
     except Exception as e:
         print(f"Error occurred while calculating total: {e}")
 
