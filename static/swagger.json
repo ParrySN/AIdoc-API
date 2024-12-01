@@ -1,0 +1,121 @@
+openapi: 3.0.3
+info:
+  title: Swagger AIDOCS
+  description: |-
+    A description of your API goes here.
+servers:
+  - url: http://127.0.0.1:5000
+tags:
+  - name: report
+    description: get users report
+paths:
+  /report:
+    get:
+      tags:
+        - report
+      summary: get report
+      parameters:
+        - name: role
+          in: header
+          required: true
+          description: Role of the requester (e.g., "dentist", "osm", "patient").
+          schema:
+            type: string
+            example: "admin"
+        - name: province
+          in: query
+          required: false
+          description: Province for which the report is requested(TH).
+          schema:
+            type: string
+            example: "เชียงใหม่"
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              example:
+                status: "success"
+                data:
+                    province: "เชียงใหม่"
+                    dentist:
+                        ai_predict:
+                            opmd: 1
+                            oscc: 2
+                            normal: 3
+                        dentist_diagnose:
+                            opmd: 1
+                            oscc: 1
+                            normal: 1
+                            poor_image: 1
+                            others: 1
+                            not_diagenosed: 1
+                        accuracy: "50.00"
+                    osm:
+                        ai_predict:
+                            opmd: 1
+                            oscc: 2
+                            normal: 3
+                        dentist_diagnose:
+                            opmd: 1
+                            oscc: 1
+                            normal: 1
+                            poor_image: 1
+                            others: 1
+                            not_diagenosed: 1
+                        accuracy: "20.00"
+                    patient:
+                        ai_predict:
+                            opmd: 1
+                            oscc: 2
+                            normal: 3
+                        dentist_diagnose:
+                            opmd: 1
+                            oscc: 1
+                            normal: 1
+                            poor_image: 1
+                            others: 1
+                            not_diagenosed: 1
+                        accuracy: "78.12"
+                    total:
+                        ai_predict:
+                            opmd: 2
+                            oscc: 4
+                            normal: 6
+                        dentist_diagnose:
+                            opmd: 2
+                            oscc: 2
+                            normal: 2
+                            poor_image: 2
+                            others: 2
+                            not_diagenosed: 2
+                        accuracy: "82.32"
+        '400':
+          description: Invalid status value
+          content:
+            application/json:
+              example:
+                status: "error"
+                message: "Invalid request parameters."
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              example:
+                status: "error"
+                message: "Resource not found."
+        '302':
+          description: Found (Redirect)
+          headers:
+            Location:
+              description: URL to redirect the client
+              schema:
+                type: string
+              example: "http://example.com"
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                status: "error"
+                message: "Internal server error occurred."

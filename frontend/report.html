@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask API Call Example</title>
+</head>
+<body>
+    <h1>Flask API Call Example</h1>
+
+    <!-- Button to trigger API call -->
+    <button onclick="getReport()">Get Report</button>
+
+    <!-- Element to display API response -->
+    <p id="response"></p>
+
+    <script>
+        function getReport() {
+            const province = 'เชียงใหม่';  // Example province value
+            const role = 'admin';           // Example role value
+
+            // Make the API call with query parameter and custom header
+            fetch(`http://127.0.0.1:5000/report/?province=${province}`, {
+                method: 'GET',
+                headers: {
+                    'x-role': role,  // Custom header with role
+                    'Content-Type': 'application/json'  // Optional content type
+                }
+            })
+            .then(response => response.json())  // Assuming the response is JSON
+            .then(data => {
+                // Display the response in the HTML
+                document.getElementById('response').textContent = `Report Data: ${JSON.stringify(data)}`;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('response').textContent = 'Error fetching report.';
+            });
+        }
+    </script>
+</body>
+</html>

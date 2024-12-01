@@ -1,16 +1,52 @@
 import json
 import db
-from report import get_table_by_channel_ai
+from report import get_account_status, get_all_submission, get_table_by_channel
 from report import get_table_by_channel_dentist
+from flask import jsonify
+from decimal import Decimal
 
-def report():
+def report(role, province):
+    patient = get_table_by_channel.get_table("PATIENT",province)
+    osm = get_table_by_channel.get_table("OSM",province)
 
-    dentist = get_table_by_channel_dentist.get_table()
-    ai = get_table_by_channel_ai.get_table()
-    output = {}
-    output['ai'] = ai
-    output['dentist'] = dentist
-    return json.dumps(output, indent=2)
+    dentist = get_table_by_channel_dentist.get_table(province)
+
+    total_pic = get_all_submission.get_all_submission(province)
+
+    account_status = get_account_status.get_account_status()
+
+    output = {
+        'patient_and_osm':{
+            'patient': patient,
+            'osm': osm,
+            'total': {}
+        },
+        'province': province,
+        'specialist': dentist,
+        'total_pic': total_pic,
+        'account_status': {}
+    }
+
+    output['patient_and_osm']['total']['ai_predict'] = sum_dicts(osm['ai_predict'], patient['ai_predict'])
+    output['patient_and_osm']['total']['dentist_diagnose'] = sum_dicts(osm['dentist_diagnose'], patient['dentist_diagnose'])
+    accuracy_values = [
+    Decimal(osm["accuracy"]),
+    Decimal(patient["accuracy"])
+    ]
+    total_accuracy = sum(accuracy_values) / len(accuracy_values)
+    output['patient_and_osm']['total']['accuracy'] = total_accuracy
+    
+    # Return the JSON output
+    return jsonify(output)
+
+def sum_dicts(dict1, dict2):
+    result = {}
+    for key in dict1:
+        if isinstance(dict1[key], dict): 
+            result[key] = sum_dicts(dict1[key], dict2[key])
+        else:  
+            result[key] = dict1[key] + dict2[key]
+    return result
 
 
 
