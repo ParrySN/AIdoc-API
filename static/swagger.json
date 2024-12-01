@@ -2,18 +2,19 @@ openapi: 3.0.3
 info:
   title: Swagger AIDOCS
   description: |-
-    A description of your API goes here.
+    A detailed API specification for fetching reports including AI predictions, dentist diagnoses, and overall statistics.
+  version: 1.0.0
 servers:
   - url: http://127.0.0.1:5000
 tags:
   - name: report
-    description: get users report
+    description: Get users report
 paths:
   /report:
     get:
       tags:
         - report
-      summary: get report
+      summary: Get a comprehensive report
       parameters:
         - name: role
           in: header
@@ -25,73 +26,97 @@ paths:
         - name: province
           in: query
           required: false
-          description: Province for which the report is requested(TH).
+          description: Province for which the report is requested (in Thai).
           schema:
             type: string
             example: "เชียงใหม่"
       responses:
         '200':
-          description: successful operation
+          description: Successful operation
           content:
             application/json:
               example:
                 status: "success"
                 data:
-                    province: "เชียงใหม่"
-                    dentist:
-                        ai_predict:
-                            opmd: 1
-                            oscc: 2
-                            normal: 3
-                        dentist_diagnose:
-                            opmd: 1
-                            oscc: 1
-                            normal: 1
-                            poor_image: 1
-                            others: 1
-                            not_diagenosed: 1
-                        accuracy: "50.00"
+                  patient_and_osm:
                     osm:
-                        ai_predict:
-                            opmd: 1
-                            oscc: 2
-                            normal: 3
-                        dentist_diagnose:
-                            opmd: 1
-                            oscc: 1
-                            normal: 1
-                            poor_image: 1
-                            others: 1
-                            not_diagenosed: 1
-                        accuracy: "20.00"
+                      accuracy: "100.00"
+                      ai_predict:
+                        normal: 0
+                        opmd: 3
+                        oscc: 1
+                      dentist_diagnose:
+                        normal: 0
+                        not_diagnosed: 0
+                        opmd: 3
+                        oscc: 1
+                        others: 0
+                        poor_image: 0
+                      total_pic: 4
                     patient:
-                        ai_predict:
-                            opmd: 1
-                            oscc: 2
-                            normal: 3
-                        dentist_diagnose:
-                            opmd: 1
-                            oscc: 1
-                            normal: 1
-                            poor_image: 1
-                            others: 1
-                            not_diagenosed: 1
-                        accuracy: "78.12"
+                      accuracy: "50.00"
+                      ai_predict:
+                        normal: 1
+                        opmd: 0
+                        oscc: 1
+                      dentist_diagnose:
+                        normal: 0
+                        not_diagnosed: 1
+                        opmd: 0
+                        oscc: 1
+                        others: 0
+                        poor_image: 0
+                      total_pic: 2
                     total:
-                        ai_predict:
-                            opmd: 2
-                            oscc: 4
-                            normal: 6
-                        dentist_diagnose:
-                            opmd: 2
-                            oscc: 2
-                            normal: 2
-                            poor_image: 2
-                            others: 2
-                            not_diagenosed: 2
-                        accuracy: "82.32"
+                      accuracy: "75.00"
+                      ai_predict:
+                        normal: 1
+                        opmd: 3
+                        oscc: 2
+                      dentist_diagnose:
+                        normal: 0
+                        not_diagnosed: 1
+                        opmd: 3
+                        oscc: 2
+                        others: 0
+                        poor_image: 0
+                  province: "เชียงใหม่"
+                  specialist:
+                    Computer Technical Officer:
+                      ai_predict:
+                        normal: 4
+                        opmd: 4
+                        oscc: 1
+                      dentist_diagnose:
+                        agree: 0
+                        disagree: 0
+                      total_pic: 9
+                    Oral Pathologist:
+                      ai_predict:
+                        normal: 1
+                        opmd: 4
+                        oscc: 2
+                      dentist_diagnose:
+                        agree: 3
+                        disagree: 1
+                      total_pic: 7
+                    total:
+                      ai_predict:
+                        normal: 5
+                        opmd: 8
+                        oscc: 3
+                      dentist_diagnose:
+                        agree: 3
+                        disagree: 1
+                      total_pic: 16
+                  total_pic:
+                    ai_predict:
+                      normal: 6
+                      opmd: 11
+                      oscc: 5
+                    total_pic: 22
         '400':
-          description: Invalid status value
+          description: Invalid request parameters
           content:
             application/json:
               example:

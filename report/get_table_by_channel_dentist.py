@@ -180,6 +180,19 @@ def get_table(province):
             # Format Output
             output = response
     except Exception as e:
+        output = {
+            "accuracy" : "-", 
+            "ai_predict": {
+                "normal": 0,
+                "opmd": 0,
+                "oscc": 0
+            },
+            "dentist_diagnose": {
+                "agree": 0,
+                "disagree": 0
+            },
+            "total_pic": 0
+        }
         # Handle Errors
         return json.dumps({"error": str(e)}), 500
     

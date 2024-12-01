@@ -33,12 +33,29 @@ def get_all_submission(province):
                 total_pic = sum(value for key, value in ai_predict_query)
                 ai_predict = mapAiPrediction(ai_predict_query)
             # Format Output
+            if ai_predict == {}: 
+                ai_predict = {
+                "normal": 0,
+                "opmd": 0,
+                "oscc": 0
+                }
+                total_pic =0
+            
+                
             output = {}
             output['total_pic'] = total_pic
             output['ai_predict'] = ai_predict
     except Exception as e:
+        output = {
+            "ai_predict": {
+            "normal": 0,
+            "opmd": 0,
+            "oscc": 0
+             },
+            "total_pic": 0
+        }
         # Handle Errors
-        return json.dumps({"error": str(e)}), 500
+        return output
     
     finally:
         # Close Connection
