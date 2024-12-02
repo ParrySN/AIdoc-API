@@ -31,7 +31,6 @@ paths:
           content:
             application/json:
               example:
-                status: "success"
                 data:
                   # Example data here (same as previous)
         '400':

@@ -234,26 +234,30 @@ def mapQueryToOutput(ai_predict_query, dentist_diagnose_query):
     total_total_pic = 0
 
     # Prepare the final output
-    output = {}
+    output = []
 
     for specialist in set(ai_predict.keys()).union(dentist_diagnose.keys()):
-        output[specialist] = {
+        specialist_data = {
+            "job": specialist,
             "ai_predict": ai_predict[specialist],
             "dentist_diagnose": dentist_diagnose[specialist],
             "total_pic": total_pics[specialist]
         }
+        output.append(specialist_data)
+
+        # Update totals
         for key in total_ai_predict:
             total_ai_predict[key] += ai_predict[specialist][key]
         for key in total_dentist_diagnose:
             total_dentist_diagnose[key] += dentist_diagnose[specialist][key]
         total_total_pic += total_pics[specialist]
 
-    # Add the totals
-    output["total"] = {
+    # Append totals as the last element in the array
+    output.append({
+        "specialist": "total",
         "ai_predict": total_ai_predict,
         "dentist_diagnose": total_dentist_diagnose,
         "total_pic": total_total_pic
-    }
-
+    })
 
     return output

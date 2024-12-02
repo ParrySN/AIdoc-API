@@ -14,7 +14,6 @@ def report(province):
     total_pic = get_all_submission.get_all_submission(province)
 
     output = {
-        'status': 'success',
         'patient_and_osm':{
             'patient': patient,
             'osm': osm,
