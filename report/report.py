@@ -1,6 +1,6 @@
 import json
 import db
-from report import  get_all_submission, get_table_by_channel, get_users_account_list
+from report import  get_all_submission, get_table_by_channel
 from report import get_table_by_channel_dentist
 from flask import jsonify, make_response
 from decimal import Decimal
@@ -55,18 +55,15 @@ def report(province):
         else:
             accuracy_values.append(Decimal(0))  # Add 0 if accuracy is missing
 
-        # Compute total accuracy by averaging valid accuracy values
         if accuracy_divider > 0:
             total_accuracy = sum(accuracy_values) / accuracy_divider
             output['patient_and_osm']['total']['accuracy'] = f"{total_accuracy:.2f}"  # Format to 2 decimal places
         else:
-            # In case no valid accuracy values are provided, set accuracy to "-"
             output['patient_and_osm']['total']['accuracy'] = "-"
         output['patient_and_osm']['total']['total_pic'] = sum([osm['total_pic'], patient['total_pic']])
     except Exception as e:
         print(f"Error occurred while calculating total: {e}")
 
-        # Set default values in case of error
         output['patient_and_osm']['total'] = {
             "ai_predict": {
                 "normal": 0,

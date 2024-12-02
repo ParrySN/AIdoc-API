@@ -193,14 +193,12 @@ def get_table(province):
             },
             "total_pic": 0
         }
-        # Handle Errors
-        return json.dumps({"error": str(e)}), 500
+        return output
     
     finally:
         # Close Connection
         connection.close()
     
-    # Return Output
     return output
 
 def mapQueryToOutput(ai_predict_query, dentist_diagnose_query):
@@ -228,12 +226,10 @@ def mapQueryToOutput(ai_predict_query, dentist_diagnose_query):
         diag = diag.lower()  # Convert to lowercase for key consistency
         dentist_diagnose[specialist][diag] += int(score)
 
-    # Initialize totals
     total_ai_predict = {"normal": 0, "opmd": 0, "oscc": 0}
     total_dentist_diagnose = {"agree": 0, "disagree": 0}
     total_total_pic = 0
 
-    # Prepare the final output
     output = []
 
     for specialist in set(ai_predict.keys()).union(dentist_diagnose.keys()):
@@ -252,9 +248,8 @@ def mapQueryToOutput(ai_predict_query, dentist_diagnose_query):
             total_dentist_diagnose[key] += dentist_diagnose[specialist][key]
         total_total_pic += total_pics[specialist]
 
-    # Append totals as the last element in the array
     output.append({
-        "specialist": "total",
+        "job": "total",
         "ai_predict": total_ai_predict,
         "dentist_diagnose": total_dentist_diagnose,
         "total_pic": total_total_pic

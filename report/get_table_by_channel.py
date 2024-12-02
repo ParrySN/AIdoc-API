@@ -81,7 +81,8 @@ def get_table(channel,province):
                 cursor.execute(query_ai_correct, (channel,))
                 ai_correct_query = cursor.fetchall()
                 true_predict = calculateTruePredict(ai_correct_query)
-                sum_dent_diagnose = sum(value for key, value in dentist_diagnose_query)
+                keys_to_sum = ['OPMD', 'OSCC', 'Normal']
+                sum_dent_diagnose = sum(value for key, value in dentist_diagnose_query if key in keys_to_sum)
                 accuracy = Decimal(true_predict/sum_dent_diagnose*100).quantize(Decimal('0.01'))
                 dentist_diagnose = mapDentDiagnosis(dentist_diagnose_query)
             else: 
@@ -159,7 +160,8 @@ def get_table(channel,province):
                 cursor.execute(query_ai_correct, (channel,province,))
                 ai_correct_query = cursor.fetchall()
                 true_predict = calculateTruePredict(ai_correct_query)
-                sum_dent_diagnose = sum(value for key, value in dentist_diagnose_query)
+                keys_to_sum = ['OPMD', 'OSCC', 'Normal']
+                sum_dent_diagnose = sum(value for key, value in dentist_diagnose_query if key in keys_to_sum)
                 accuracy = Decimal(true_predict/sum_dent_diagnose*100).quantize(Decimal('0.01'))
                 dentist_diagnose = mapDentDiagnosis(dentist_diagnose_query)
             # Format Output
@@ -186,7 +188,6 @@ def get_table(channel,province):
             },
             "total_pic": 0
         }
-        # Handle Errors
         return output
     
     finally:
