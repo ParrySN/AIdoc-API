@@ -1,11 +1,11 @@
 import json
 import db
-from report import get_account_status, get_all_submission, get_table_by_channel
+from report import  get_all_submission, get_table_by_channel
 from report import get_table_by_channel_dentist
 from flask import jsonify, make_response
 from decimal import Decimal
 
-def report(role, province):
+def report(province):
     patient = get_table_by_channel.get_table("PATIENT",province)
     osm = get_table_by_channel.get_table("OSM",province)
 

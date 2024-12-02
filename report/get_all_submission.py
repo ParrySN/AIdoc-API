@@ -40,7 +40,6 @@ def get_all_submission(province):
                 "oscc": 0
                 }
                 total_pic =0
-            
                 
             output = {}
             output['total_pic'] = total_pic

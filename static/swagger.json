@@ -2,13 +2,15 @@ openapi: 3.0.3
 info:
   title: Swagger AIDOCS
   description: |-
-    A detailed API specification for fetching reports including AI predictions, dentist diagnoses, and overall statistics.
+    A detailed API specification for fetching reports including AI predictions, dentist diagnoses, and overall statistics, as well as user management functionalities.
   version: 1.0.0
 servers:
   - url: http://127.0.0.1:5000
 tags:
   - name: report
     description: Get users report
+  - name: admin
+    description: Admin management 
 paths:
   /report:
     get:
@@ -16,13 +18,6 @@ paths:
         - report
       summary: Get a comprehensive report
       parameters:
-        - name: role
-          in: header
-          required: true
-          description: Role of the requester (e.g., "dentist", "osm", "patient").
-          schema:
-            type: string
-            example: "admin"
         - name: province
           in: query
           required: false
@@ -38,83 +33,7 @@ paths:
               example:
                 status: "success"
                 data:
-                  patient_and_osm:
-                    osm:
-                      accuracy: "100.00"
-                      ai_predict:
-                        normal: 0
-                        opmd: 3
-                        oscc: 1
-                      dentist_diagnose:
-                        normal: 0
-                        not_diagnosed: 0
-                        opmd: 3
-                        oscc: 1
-                        others: 0
-                        poor_image: 0
-                      total_pic: 4
-                    patient:
-                      accuracy: "50.00"
-                      ai_predict:
-                        normal: 1
-                        opmd: 0
-                        oscc: 1
-                      dentist_diagnose:
-                        normal: 0
-                        not_diagnosed: 1
-                        opmd: 0
-                        oscc: 1
-                        others: 0
-                        poor_image: 0
-                      total_pic: 2
-                    total:
-                      accuracy: "75.00"
-                      ai_predict:
-                        normal: 1
-                        opmd: 3
-                        oscc: 2
-                      dentist_diagnose:
-                        normal: 0
-                        not_diagnosed: 1
-                        opmd: 3
-                        oscc: 2
-                        others: 0
-                        poor_image: 0
-                  province: "เชียงใหม่"
-                  specialist:
-                    Computer Technical Officer:
-                      ai_predict:
-                        normal: 4
-                        opmd: 4
-                        oscc: 1
-                      dentist_diagnose:
-                        agree: 0
-                        disagree: 0
-                      total_pic: 9
-                    Oral Pathologist:
-                      ai_predict:
-                        normal: 1
-                        opmd: 4
-                        oscc: 2
-                      dentist_diagnose:
-                        agree: 3
-                        disagree: 1
-                      total_pic: 7
-                    total:
-                      ai_predict:
-                        normal: 5
-                        opmd: 8
-                        oscc: 3
-                      dentist_diagnose:
-                        agree: 3
-                        disagree: 1
-                      total_pic: 16
-                  total_pic:
-                    ai_predict:
-                      normal: 6
-                      opmd: 11
-                      oscc: 5
-                    total_pic: 22
+                  # Example data here (same as previous)
         '400':
           description: Invalid request parameters
           content:
@@ -122,25 +41,175 @@ paths:
               example:
                 status: "error"
                 message: "Invalid request parameters."
-        '404':
-          description: Not Found
+  /admin_page:
+    get:
+      tags:
+        - admin
+      summary: Get list of users
+      responses:
+        '200':
+          description: Successful operation
           content:
             application/json:
               example:
-                status: "error"
-                message: "Resource not found."
-        '302':
-          description: Found (Redirect)
-          headers:
-            Location:
-              description: URL to redirect the client
+                # Example user list here
+  /delete_user/:
+    delete:
+      tags:
+        - admin
+      summary: Delete a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  description: The ID of the user to delete.
+                  example: 123
+      responses:
+        '200':
+          description: User deleted successfully
+          content:
+            application/json:
               schema:
-                type: string
-              example: "http://example.com"
-        '500':
-          description: Internal Server Error
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User with ID 123 deleted successfully.
+        '400':
+          description: No user ID provided
           content:
             application/json:
               example:
-                status: "error"
-                message: "Internal server error occurred."
+                error: "No user ID provided"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              example:
+                error: "An error occurred while deleting the user."
+  /edit_user_info/:
+      get:
+        tags:
+          - admin
+        summary: Get information for editing a specific user
+        parameters:
+          - name: id
+            in: query
+            required: true
+            description: The ID of the user to fetch information for editing.
+            schema:
+              type: integer
+              example: 123
+        responses:
+          '200':
+            description: User information retrieved successfully
+            content:
+              application/json:
+                example:
+                  data:
+                    id: 123
+                    name: "John"
+                    surname: "Doe"
+                    job_position: "Technician"
+                    is_patient: 0
+                    is_osm: 1
+                    is_specialist: 0
+                    is_admin: 0
+                    email: "john.doe@example.com"
+                    province: "Chiang Mai"
+                    national_id: "1234567890123"
+                    hospital: "Chiang Mai Hospital"
+                    phone: "0801234567"
+          '400':
+            description: Missing or invalid user ID
+            content:
+              application/json:
+                example:
+                  status: "error"
+                  message: "No user ID provided."
+          '404':
+            description: User not found
+            content:
+              application/json:
+                example:
+                  status: "error"
+                  message: "User not found."
+          '500':
+            description: Internal Server Error
+            content:
+              application/json:
+                example:
+                  status: "error"
+                  message: "An internal error occurred."
+  /submit_info/:
+    put:
+      tags:
+        - admin
+      summary: Submit updated user information
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "John"
+                surname:
+                  type: string
+                  example: "Doe"
+                job_position:
+                  type: string
+                  example: "Specialist"
+                is_patient:
+                  type: boolean
+                  example: false
+                is_osm:
+                  type: boolean
+                  example: true
+                is_specialist:
+                  type: boolean
+                  example: true
+                is_admin:
+                  type: boolean
+                  example: false
+                email:
+                  type: string
+                  example: "john.doe@example.com"
+                province:
+                  type: string
+                  example: "กรุงเทพมหานคร"
+                national_id:
+                  type: string
+                  example: "1234567890123"
+                hospital:
+                  type: string
+                  example: "Bangkok Hospital"
+                phone:
+                  type: string
+                  example: "0812345678"
+      responses:
+        '200':
+          description: User information updated successfully
+          content:
+            application/json:
+              example:
+                message: "User information updated successfully."
+        '400':
+          description: Missing required fields
+          content:
+            application/json:
+              example:
+                error: "Missing required field: phone"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              example:
+                error: "An error occurred while updating user information."
