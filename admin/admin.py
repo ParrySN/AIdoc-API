@@ -1,5 +1,5 @@
 import json
-from admin import get_user_account_list, get_user_edit_info, update_user_info
+from admin import get_image_manage, get_user_account_list, get_user_edit_info, update_user_info
 import db
 from flask import jsonify, make_response, request
 from decimal import Decimal
@@ -40,6 +40,9 @@ def updateUserInfo(data):
     output = update_user_info.updateUserInfo(data)
     return output
     
+def GetImageManage():
+    output = get_image_manage.image_manage()
+    return jsonify({"message": "Image management page."})
 
 
 

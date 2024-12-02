@@ -50,3 +50,7 @@ def submitEditedInfo():
 
     return output
 
+@admin_bp.route('/image_manage/', methods=['GET'])
+def GetImageManage():
+    return admin.getAdminPage()
+
