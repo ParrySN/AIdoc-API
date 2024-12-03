@@ -32,10 +32,8 @@ from flask import request, jsonify
 
 @admin_bp.route('/submit_info/', methods=['PUT'])
 def put_submit_edited_info():
-    # Get the JSON data from the request body
     data = request.get_json()
 
-    # Check if all required fields are in the request data
     required_fields = [
         "name", "surname", "job_position", "is_patient", "is_osm", 
         "is_specialist", "is_admin", "email", "province", "national_id", 
@@ -52,5 +50,5 @@ def put_submit_edited_info():
 
 @admin_bp.route('/image_manage/', methods=['GET'])
 def get_image_manage():
-    return admin.getAdminPage()
+    return {}
 
