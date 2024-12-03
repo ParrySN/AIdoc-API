@@ -1,14 +1,8 @@
 import json
-from admin import get_image_manage, get_user_account_list, get_user_edit_info, update_user_info
 import db
-from flask import jsonify, make_response, request
-from decimal import Decimal
 
-def getAdminPage():
-    output = get_user_account_list.get_users()
-    return jsonify(output)
 
-def deleteUser(id):
+def delete_user():
     connection = db.connect_to_mysql()
     if not connection:
         return json.dumps({"error": "Failed to connect to the database."}), 500
@@ -17,6 +11,7 @@ def deleteUser(id):
         with connection.cursor() as cursor:
             sql_delete_submission = "DELETE FROM submission_record WHERE sender_id = %s"
             cursor.execute(sql_delete_submission, (id,))
+            connection.commit()
             sql = "DELETE FROM user WHERE id = %s"
             cursor.execute(sql, (id,))
             connection.commit()
@@ -33,28 +28,3 @@ def deleteUser(id):
         connection.close()
 
     return json.dumps({"message": f"User with ID {id} deleted successfully."}), 200
-
-def getUserEditInfo(id):
-    output = get_user_edit_info.getUserEditProfile(id)
-    return output
-
-def updateUserInfo(data):
-    output = update_user_info.updateUserInfo(data)
-    return output
-    
-def GetImageManage():
-    output = get_image_manage.image_manage()
-    return jsonify({"message": "Image management page."})
-
-
-
-
-
-
-
-
-
-
-
-
-
