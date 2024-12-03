@@ -7,12 +7,12 @@ admin_bp = Blueprint('admin', __name__)
 
 @admin_bp.route('/admin_page/', methods=['GET'])
 def get_admin_page():
-    return admin.getAdminPage()
+    return admin.generate_admin_page()
 
 @admin_bp.route('/edit_user_info/', methods=['GET'])
 def get_edit_user():
     id = request.args.get('id')
-    output = admin.getUserEditInfo(id)
+    output = admin.generate_user_edit_info(id)
     return output
 
 @admin_bp.route('/delete_user/', methods=['DELETE'])
@@ -24,7 +24,7 @@ def delete_user():
     
     user_id = data['id']
     
-    output = admin.deleteUser(user_id)
+    output = admin.delete_user(user_id)
     
     return output
 
@@ -44,7 +44,7 @@ def put_submit_edited_info():
         if field not in data:
             return jsonify({"error": f"Missing required field: {field}"}), 400
 
-    output = admin.updateUserInfo(data)
+    output = admin.put_update_user_info(data)
 
     return output
 

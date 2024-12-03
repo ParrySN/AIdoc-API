@@ -2,7 +2,7 @@
 from flask import json, jsonify
 import db
 
-def updateUserInfo(data):
+def update_user_info(data):
     connection = db.connect_to_mysql()
     if not connection:
         return json.dumps({"error": "Failed to connect to the database."}), 500
@@ -44,13 +44,12 @@ def updateUserInfo(data):
             connection.commit()
             output = {
                 "message": "User information updated successfully.",
-                "updated_info": data  # Returning the updated information for confirmation
+                "updated_info": data  
             }
     except Exception as e:
-        output = json.dumps({"error": f"An error occurred while fetching user data: {e}"})
-        return output, 500
+        return json.dumps({"error": f"An error occurred while fetching user data: {e}"}), 500
     
     finally:
         connection.close()
 
-    return jsonify(output), 200
+    return output

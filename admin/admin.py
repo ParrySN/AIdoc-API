@@ -1,45 +1,23 @@
 import json
-from admin import get_image_manage, get_user_account_list, get_user_edit_info, update_user_info
+from admin import delete_user_account, get_image_manage, get_user_account_list, get_user_edit_info, update_user_info
 import db
 from flask import jsonify, make_response, request
 from decimal import Decimal
 
-def get_admin_page():
-    output = get_user_account_list.get_users()
-    return jsonify(output)
-
-def deleteUser(id):
-    connection = db.connect_to_mysql()
-    if not connection:
-        return json.dumps({"error": "Failed to connect to the database."}), 500
-    
-    try:
-        with connection.cursor() as cursor:
-            sql_delete_submission = "DELETE FROM submission_record WHERE sender_id = %s"
-            cursor.execute(sql_delete_submission, (id,))
-            sql = "DELETE FROM user WHERE id = %s"
-            cursor.execute(sql, (id,))
-            connection.commit()
-
-            if cursor.rowcount == 0:
-                # No rows affected, so user with that id doesn't exist
-                return json.dumps({"error": "User not found."}), 404
-
-    except Exception as e:
-        output = json.dumps({"error": f"An error occurred while deleting user: {e}"})
-        return output, 500
-    
-    finally:
-        connection.close()
-
-    return json.dumps({"message": f"User with ID {id} deleted successfully."}), 200
-
-def getUserEditInfo(id):
-    output = get_user_edit_info.getUserEditProfile(id)
+def generate_admin_page():
+    output = get_user_account_list.users_list()
     return output
 
-def updateUserInfo(data):
-    output = update_user_info.updateUserInfo(data)
+def delete_user(id):
+    output = delete_user_account.delete_user(id)
+    return output
+
+def generate_user_edit_info(id):
+    output = get_user_edit_info.user_info(id)
+    return output
+
+def put_update_user_info(data):
+    output = update_user_info.update_user_info(data)
     return output
     
 def GetImageManage():
