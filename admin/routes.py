@@ -6,17 +6,17 @@ admin_bp = Blueprint('admin', __name__)
 
 
 @admin_bp.route('/admin_page/', methods=['GET'])
-def GetAdminPage():
+def get_admin_page():
     return admin.getAdminPage()
 
 @admin_bp.route('/edit_user_info/', methods=['GET'])
-def EditUser():
+def get_edit_user():
     id = request.args.get('id')
     output = admin.getUserEditInfo(id)
     return output
 
 @admin_bp.route('/delete_user/', methods=['DELETE'])
-def DeleteUser():
+def delete_user():
     data = request.get_json()
     
     if not data or 'id' not in data:
@@ -31,7 +31,7 @@ def DeleteUser():
 from flask import request, jsonify
 
 @admin_bp.route('/submit_info/', methods=['PUT'])
-def submitEditedInfo():
+def put_submit_edited_info():
     # Get the JSON data from the request body
     data = request.get_json()
 
@@ -51,6 +51,6 @@ def submitEditedInfo():
     return output
 
 @admin_bp.route('/image_manage/', methods=['GET'])
-def GetImageManage():
+def get_image_manage():
     return admin.getAdminPage()
 

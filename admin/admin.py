@@ -4,7 +4,7 @@ import db
 from flask import jsonify, make_response, request
 from decimal import Decimal
 
-def getAdminPage():
+def get_admin_page():
     output = get_user_account_list.get_users()
     return jsonify(output)
 
