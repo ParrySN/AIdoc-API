@@ -73,7 +73,7 @@ paths:
                 properties:
                   error:
                     type: string
-                    example: invalid password.
+                    example: invalid username/password or thid/mobile.
         "500":
           description: Internal server error
           content:

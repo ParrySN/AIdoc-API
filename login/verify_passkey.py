@@ -13,7 +13,7 @@ def verify_by_username_password(username, password):
             cursor.execute(sql, (username,))
             user = cursor.fetchone()
             
-            if not user: return json.dumps({"error": "invalid credential"}), 401
+            if not user: return json.dumps({"error": "invalid username"}), 401
             
             hashed_password = user[1]
             if check_password_hash(hashed_password, password):
