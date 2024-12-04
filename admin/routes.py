@@ -48,7 +48,4 @@ def put_submit_edited_info():
 
     return output
 
-@admin_bp.route('/image_manage/', methods=['GET'])
-def get_image_manage():
-    return {}
 
