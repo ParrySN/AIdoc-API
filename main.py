@@ -1,5 +1,6 @@
 from flask import Flask, jsonify
 from report import report_bp
+from submission import submission_bp
 from flask_swagger_ui import get_swaggerui_blueprint
 from flask_cors import CORS
 # from products import products_bp
@@ -24,7 +25,7 @@ app.register_blueprint(SWAGGERUI_BLUEPRINT, url_prefix=SWAGGER_URL)
 app.register_blueprint(report_bp, url_prefix='/')
 # app.register_blueprint(users_bp, url_prefix='/')
 # app.register_blueprint(products_bp, url_prefix='/api')
-
+app.register_blueprint(submission_bp, url_prefix='/')
 
 
 app.json.ensure_ascii=False
