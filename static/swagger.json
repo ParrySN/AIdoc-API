@@ -7,12 +7,6 @@ info:
 servers:
   - url: http://127.0.0.1:5000
 tags:
-  - name: report
-    description: Get users report
-  - name: admin
-    description: Admin management 
-  - name: login
-    description: Login verification
   - name: submission
     description: Submission record
 paths:
@@ -36,19 +30,112 @@ paths:
           required: true
           schema:
             type: integer
+            format: int64
             example: 1
           description: user id of submission record .
       responses:
         "200":
-          description: User verified successfully
+          description: Return records successfully.
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  message:
+                  Remark:
                     type: string
-                    example: valid credential.
+                    nullable: true
+                    example: null
+                  ai_prediction:
+                    type: number
+                    format: float
+                    example: 0
+                  ai_scores:
+                    type: string
+                    example: "[0.1, 0.2, 0.3]"
+                  biopsy_comment:
+                    type: string
+                    nullable: true
+                    example: null
+                  biopsy_fname:
+                    type: string
+                    nullable: true
+                    example: null
+                  case_report:
+                    type: string
+                    example: ""
+                  channel:
+                    type: string
+                    example: "PATIENT"
+                  created_at:
+                    type: string
+                    format: date-time
+                    example: "Mon, 1 Jan 2001 00:00:00 GMT"
+                  dentist_feedback_code:
+                    type: string
+                    nullable: true
+                    example: null
+                  dentist_feedback_comment:
+                    type: string
+                    example: ""
+                  dentist_feedback_date:
+                    type: string
+                    format: date-time
+                    nullable: true
+                    example: null
+                  dentist_feedback_lesion:
+                    type: string
+                    nullable: true
+                    example: null
+                  dentist_feedback_location:
+                    type: string
+                    nullable: true
+                    example: null
+                  dentist_id:
+                    type: integer
+                    nullable: true
+                    example: null
+                  fname:
+                    type: string
+                    example: "example.tif"
+                  id:
+                    type: integer
+                    example: 1
+                  location_amphoe:
+                    type: string
+                    example: "พระนคร"
+                  location_district:
+                    type: string
+                    example: "เสาชิงช้า"
+                  location_province:
+                    type: string
+                    example: "กรุงเทพมหานคร"
+                  location_zipcode:
+                    type: integer
+                    example: 10000
+                  patient_id:
+                    type: integer
+                    example: 1
+                  patient_national_id:
+                    type: string
+                    nullable: true
+                    example: null
+                  sender_id:
+                    type: integer
+                    example: 2
+                  sender_phone:
+                    type: string
+                    nullable: true
+                    example: null
+                  special_request:
+                    type: integer
+                    example: 0
+                  updated_at:
+                    type: string
+                    format: date-time
+                    nullable: true
+                    example: null
+              
+                  
         "400":
           description: Bad request due to missing or invalid input
           content:
