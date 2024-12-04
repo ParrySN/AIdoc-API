@@ -1,0 +1,72 @@
+openapi: 3.0.3
+info:
+  title: Swagger AIDOCS
+  description: |-
+    A detailed API specification for fetching reports including AI predictions, dentist diagnoses, and overall statistics, as well as user management functionalities.
+  version: 1.0.0
+servers:
+  - url: http://127.0.0.1:5000
+tags:
+  - name: report
+    description: Get users report
+  - name: admin
+    description: Admin management 
+  - name: login
+    description: Login verification
+  - name: submission
+    description: Submission record
+paths:
+  /record/get_by_role:
+    get:
+      tags:
+        - submission
+      summary: Verify user credentials
+      description: Verifies a user by username/password or by thid/mobile using query parameters.
+      parameters:
+        - name: role
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [admin, patient, osm, dentist]
+            example: patient
+          description: Role of submission record.
+        - name: user_id
+          in: query
+          required: true
+          schema:
+            type: integer
+            example: 1
+          description: user id of submission record .
+      responses:
+        "200":
+          description: User verified successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: valid credential.
+        "400":
+          description: Bad request due to missing or invalid input
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: invalid role.
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example:
+                      An error occurred: Internal Server Error
