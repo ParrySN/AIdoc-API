@@ -10,6 +10,17 @@ def connect_to_mysql():
         password='icoh2017p@ssw0rd' 	# mysql password for the username
     )
     return connection
+
+def connect_to_oralcancer():
+    # Connect to MySQL database
+    connection = pymysql.connect(
+        host='icohold.anamai.moph.go.th', # database server
+        port=3306,
+        database='oralcancer',	
+        user='patiwet', 	# mysql username
+        password='icoh2017p@ssw0rd' 	# mysql password for the username
+    )
+    return connection
     
 
 if __name__ == "__main__":

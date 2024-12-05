@@ -11,6 +11,8 @@ tags:
     description: Get users report
   - name: admin
     description: Admin management 
+  - name: login
+    description: Login to the system
 paths:
   /report:
     get:
@@ -315,3 +317,99 @@ paths:
             application/json:
               example:
                 error: "An error occurred while updating user information."
+
+
+  /verify/user:
+    get:
+      tags:
+        - Login
+      summary: Verify user by key
+      description: This endpoint verifies a user by their `thid` or `username` in the `aidoc_development` database or by their `thid` in the `oralcancer` database.
+      parameters:
+        - name: key
+          in: query
+          required: true
+          description: The identifier to search for a user. Can be either `thid` or `username`.
+          schema:
+            type: string
+            example: "1234567890"
+      responses:
+        200:
+          description: User found in the `aidoc_development` database.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  thid:
+                    type: string
+                    example: "1234567890"
+                  username:
+                    type: string
+                    example: "johndoe"
+                  role:
+                    type: array
+                    items:
+                      type: string
+                    example: ["admin", "editor"]
+        201:
+          description: User found in the `oralcancer` database.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  thid:
+                    type: string
+                    example: "1234567890"
+                  first_name:
+                    type: string
+                    example: "John"
+                  last_name:
+                    type: string
+                    example: "Doe"
+                  gender:
+                    type: string
+                    example: "Male"
+                  dob:
+                    type: string
+                    format: date
+                    example: "1985-06-15"
+                  province:
+                    type: string
+                    example: "Bangkok"
+                  district:
+                    type: string
+                    example: "Chatuchak"
+                  subdistrict:
+                    type: string
+                    example: "Lat Yao"
+                  address1:
+                    type: string
+                    example: "123 Main Street"
+                  mobile:
+                    type: string
+                    example: "+66812345678"
+                  career:
+                    type: string
+                    example: "Teacher"
+        400:
+          description: Missing required `key` parameter.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "key is required"
+        401:
+          description: User not found in either database.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "user not found"
