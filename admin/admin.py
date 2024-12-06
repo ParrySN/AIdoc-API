@@ -20,10 +20,9 @@ def put_update_user_info(data):
     output = update_user_info.update_user_info(data)
     return output
     
-def GetImageManage():
-    output = get_image_manage.image_manage()
-    return jsonify({"message": "Image management page."})
-
+def get_image_manage_list():
+    output = get_image_manage.get_image_manage_list()
+    return output
 
 
 

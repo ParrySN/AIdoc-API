@@ -2,7 +2,7 @@ import db
 import json
 from decimal import Decimal
 
-def image_manage():
+def get_image_manage_list():
     # Establish database connection
     connection = db.connect_to_mysql()
     if not connection:

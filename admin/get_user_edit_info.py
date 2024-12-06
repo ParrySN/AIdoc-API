@@ -9,10 +9,10 @@ def user_info(id):
     
     try:
         with connection.cursor() as cursor:
-            user_info_query = fetch_user_info(cursor)
+            user_info_query = fetch_user_info(cursor,id)
 
             if not user_info_query:
-                return json.dumps({"error": "User not found."}), 404
+                return json.dumps({"error": "User not found."}), 400
 
             user_data = {
                 "id": user_info_query[0],
@@ -38,9 +38,10 @@ def user_info(id):
 
     return jsonify(user_data)
 
-def fetch_user_info(cursor):
+def fetch_user_info(cursor,id):
+    print(id)
     query ="""
-        SELECT 
+        SELECT
             id,
             name,
             surname,
@@ -48,7 +49,8 @@ def fetch_user_info(cursor):
             is_patient,
             is_osm,
             is_specialist,
-            is_admin,email,
+            is_admin,
+            email,
             province,
             national_id,
             hospital,
@@ -56,7 +58,7 @@ def fetch_user_info(cursor):
             FROM user 
         WHERE id = %s
             """
-    cursor.execute(query)
-    user_info_query = cursor.fetchall()
+    cursor.execute(query,(id,))
+    user_info_query = cursor.fetchone()
 
     return user_info_query
