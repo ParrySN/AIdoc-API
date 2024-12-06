@@ -1,6 +1,7 @@
 
 from flask import json, jsonify
 import db
+import common.common_mapper as cm
 
 def user_info(id):
     connection = db.connect_to_mysql()
@@ -18,7 +19,7 @@ def user_info(id):
                 "id": user_info_query[0],
                 "name": user_info_query[1],
                 "surname": user_info_query[2],
-                "job_position": user_info_query[3],
+                "job_position": cm.map_job_position_to_th(user_info_query[3]),
                 "is_patient": user_info_query[4],
                 "is_osm": user_info_query[5],
                 "is_specialist": user_info_query[6],
