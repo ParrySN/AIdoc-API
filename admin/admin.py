@@ -18,6 +18,7 @@ def generate_user_edit_info(id):
 
 def put_update_user_info(data):
     output = update_user_info.update_user_info(data)
+    print(output)
     return output
     
 def get_image_manage_list():

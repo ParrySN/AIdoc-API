@@ -27,7 +27,8 @@ def user_info(id):
                 "province": user_info_query[9],
                 "national_id": user_info_query[10],
                 "hospital": user_info_query[11],
-                "phone": user_info_query[12]
+                "phone": user_info_query[12],
+                "license": user_info_query[13]
             }
 
     except Exception as e:
@@ -54,7 +55,8 @@ def fetch_user_info(cursor,id):
             province,
             national_id,
             hospital,
-            phone 
+            phone,
+            license
             FROM user 
         WHERE id = %s
             """

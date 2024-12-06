@@ -23,7 +23,8 @@ def update_user_info(data):
                 province = %s,
                 national_id = %s,
                 hospital = %s,
-                phone = %s
+                phone = %s,
+                license = %s
                 WHERE id = %s;
             """
             cursor.execute(sql, (
@@ -40,6 +41,7 @@ def update_user_info(data):
                 data['hospital'], 
                 data['phone'], 
                 data['id'],
+                data['license'],
             ))
             connection.commit()
             output = {
