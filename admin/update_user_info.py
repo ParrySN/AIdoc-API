@@ -39,11 +39,12 @@ def update_user_info(data):
                 data['province'], 
                 data['national_id'], 
                 data['hospital'], 
-                data['phone'], 
+                data['phone'],
+                data['license'], 
                 data['id'],
-                data['license'],
             ))
             connection.commit()
+            
             output = {
                 "message": "User information updated successfully.",
                 "updated_info": data  
