@@ -1,8 +1,7 @@
 import db
 import json
 from decimal import Decimal
-
-from report.report_mapper import map_ai_prediction
+from common import common_mapper as cm
 
 def get_all_submission(province):
     connection = db.connect_to_mysql()
@@ -13,7 +12,7 @@ def get_all_submission(province):
         with connection.cursor() as cursor:
             ai_predict_query, total_pic = fetch_ai_predictions(cursor, province)
             
-            ai_predict = map_ai_prediction(ai_predict_query)
+            ai_predict = cm.map_ai_prediction(ai_predict_query)
             
             if not ai_predict:
                 ai_predict = {"normal": 0, "opmd": 0, "oscc": 0}

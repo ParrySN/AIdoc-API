@@ -1,8 +1,7 @@
 import db
 import json
 from decimal import Decimal
-
-from report.report_mapper import map_ai_prediction, map_dentist_diagnosis
+from common import common_mapper as cm
 
 def get_table(channel, province):
     connection = db.connect_to_mysql()
@@ -12,10 +11,10 @@ def get_table(channel, province):
     try:
         with connection.cursor() as cursor:
             ai_predict_query, total_pic = fetch_ai_predictions(cursor, channel, province)
-            ai_predict = map_ai_prediction(ai_predict_query)
+            ai_predict = cm.map_ai_prediction(ai_predict_query)
 
             dentist_diagnose_query = fetch_dentist_feedback(cursor, channel, province)
-            dentist_diagnose = map_dentist_diagnosis(dentist_diagnose_query)
+            dentist_diagnose = cm.map_dentist_diagnosis(dentist_diagnose_query)
 
             diagnosed_submission_query = fetch_diagnosed_submission(cursor, channel, province)
             true_predict = calculate_true_predict(diagnosed_submission_query)
