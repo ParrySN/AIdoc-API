@@ -21,8 +21,8 @@ def put_update_user_info(data):
     print(output)
     return output
     
-def get_image_manage_list():
-    output = get_image_manage.image_manage_list()
+def get_image_manage_list(data):
+    output = get_image_manage.image_manage_list(data)
     return output
 
 

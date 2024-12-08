@@ -2,7 +2,7 @@ import json
 import db
 
 
-def delete_user():
+def delete_user(id):
     connection = db.connect_to_mysql()
     if not connection:
         return json.dumps({"error": "Failed to connect to the database."}), 500
@@ -15,7 +15,7 @@ def delete_user():
             update_submission_record(cursor, id)
             connection.commit()
 
-            delete_user(cursor, id)
+            delete_user_query(cursor, id)
             connection.commit()
 
             if cursor.rowcount == 0:
@@ -37,6 +37,6 @@ def update_submission_record(cursor, id):
     query = "UPDATE submission_record SET patient_id = NULL WHERE patient_id = %s"
     cursor.execute(query, (id,))
 
-def delete_user(cursor, id):
+def delete_user_query(cursor, id):
     query = "DELETE FROM user WHERE id = %s"
     cursor.execute(query, (id,))

@@ -50,6 +50,25 @@ def put_submit_edited_info():
 
 @admin_bp.route('/image_manage/', methods=['GET'])
 def get_image_manage():
-    output = admin.get_image_manage_list()
+    limit = request.args.get('limit', default=10, type=int)
+    page = request.args.get('page', default=1, type=int)
+    priority = request.args.get('priority')
+    dentist_checked = request.args.get('dentist_checked')
+    province = request.args.get('province')
+    dentist_id = request.args.get('dentist_id')
+    search_term = request.args.get('search_term')
+    data = {
+        "priority": priority,
+        "dentist_checked": dentist_checked,
+        "province": province,
+        "dentist_id": dentist_id,
+        "search_term": search_term,
+        "limit": limit,
+        "page": page
+    }
+
+    output = admin.get_image_manage_list(data)
+    
     return output
+
 
