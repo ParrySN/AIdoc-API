@@ -11,7 +11,7 @@ def get_table(channel, province):
     try:
         with connection.cursor() as cursor:
             ai_predict_query, total_pic = fetch_ai_predictions(cursor, channel, province)
-            ai_predict = cm.map_ai_prediction(ai_predict_query)
+            ai_predict = cm.map_ai_prediction_list(ai_predict_query)
 
             dentist_diagnose_query = fetch_dentist_feedback(cursor, channel, province)
             dentist_diagnose = cm.map_dentist_diagnosis(dentist_diagnose_query)

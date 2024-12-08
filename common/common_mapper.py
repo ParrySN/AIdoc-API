@@ -1,4 +1,4 @@
-def map_ai_prediction(predictions):
+def map_ai_prediction_list(predictions):
     prediction_mapping = {0: "normal", 1: "opmd", 2: "oscc"}
     return {prediction_mapping.get(item[0], "unknown"): item[1] for item in predictions}
 

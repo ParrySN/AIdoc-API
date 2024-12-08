@@ -12,7 +12,7 @@ def get_all_submission(province):
         with connection.cursor() as cursor:
             ai_predict_query, total_pic = fetch_ai_predictions(cursor, province)
             
-            ai_predict = cm.map_ai_prediction(ai_predict_query)
+            ai_predict = cm.map_ai_prediction_list(ai_predict_query)
             
             if not ai_predict:
                 ai_predict = {"normal": 0, "opmd": 0, "oscc": 0}
