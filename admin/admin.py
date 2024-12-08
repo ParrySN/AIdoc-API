@@ -34,5 +34,3 @@ def get_image_manage_list(data):
 
 
 
-
-
