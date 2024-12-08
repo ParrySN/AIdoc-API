@@ -27,4 +27,4 @@ def map_job_position_to_th(job_position):
         "Other Government Officer": "เจ้าหน้าที่รัฐอื่น",
         "General Public": "บุคคลทั่วไป"
     }
-    return job_position_dict.get(job_position, "Unknown Position")
+    return job_position_dict.get(job_position, "ผู้ป่วย")
