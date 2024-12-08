@@ -1,3 +1,18 @@
+def map_ai_prediction(predictions):
+    prediction_mapping = {0: "normal", 1: "opmd", 2: "oscc"}
+    return {prediction_mapping.get(item[0], "unknown"): item[1] for item in predictions}
+
+def map_ai_prediction_int(prediction):
+    prediction_mapping = {0: "normal", 1: "opmd", 2: "oscc"}
+    return prediction_mapping.get(prediction, "unknown")
+
+def map_dentist_diagnosis(diagnoses):
+    diagnosis_mapping = {
+        "OSCC": "oscc", "OPMD": "opmd", "Normal": "normal",
+        "BAD_IMG": "poor_image", "OTHER": "others", "Not_diagnosed": "not_diagnosed"
+    }
+    return {diagnosis_mapping.get(item[0], "unknown"): int(item[1]) for item in diagnoses}
+
 def map_job_position_to_th(job_position):
     job_position_dict = {
         "OSM": "อสม.",

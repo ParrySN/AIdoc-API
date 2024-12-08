@@ -184,3 +184,15 @@ paths:
             application/json:
               example:
                 error: "An error occurred while updating user information."
+  /image_manage:
+    get:
+      tags:
+        - admin
+      summary: Get list submission images
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              example:
+                # Example user list here

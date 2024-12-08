@@ -22,7 +22,7 @@ def put_update_user_info(data):
     return output
     
 def get_image_manage_list():
-    output = get_image_manage.get_image_manage_list()
+    output = get_image_manage.image_manage_list()
     return output
 
 

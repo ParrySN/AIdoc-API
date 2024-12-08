@@ -9,12 +9,13 @@ def delete_user():
     
     try:
         with connection.cursor() as cursor:
-            delete_submission_query = "DELETE FROM submission_record WHERE sender_id = %s"
-            cursor.execute(delete_submission_query, (id,))
-
+            delete_submission_record(cursor, id)
             connection.commit()
-            sql = "DELETE FROM user WHERE id = %s"
-            cursor.execute(sql, (id,))
+
+            update_submission_record(cursor, id)
+            connection.commit()
+
+            delete_user(cursor, id)
             connection.commit()
 
             if cursor.rowcount == 0:
@@ -27,3 +28,15 @@ def delete_user():
         connection.close()
 
     return json.dumps({"message": f"User with ID {id} deleted successfully."}), 200
+
+def delete_submission_record(cursor, id):
+    query = "DELETE FROM submission_record WHERE sender_id = %s"
+    cursor.execute(query, (id,))
+
+def update_submission_record(cursor, id):
+    query = "UPDATE submission_record SET patient_id = NULL WHERE patient_id = %s"
+    cursor.execute(query, (id,))
+
+def delete_user(cursor, id):
+    query = "DELETE FROM user WHERE id = %s"
+    cursor.execute(query, (id,))

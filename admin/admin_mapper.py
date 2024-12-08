@@ -1,4 +1,6 @@
 import common.common_mapper as cm
+import common.date_util as du
+
 def map_user_list_data(data):
     user_list = []
 
@@ -27,4 +29,27 @@ def map_user_list_data(data):
 
     return user_list
 
+def map_image_manage_list_data(data):
+    image_manage_list = []
+    for row in data:
+        image= {
+            "submission_id": row[0],
+            "file_name": row[1],
+            "submission_date": du.format_date_to_ddMMyyyy_time(row[2]),
+            "ai_prediction": cm.map_ai_prediction_int(row[3]).upper(),
+            "sender_fullname": f"{row[4]} {row[5]}",
+            "sender_name": row[4],
+            "sender_surname": row[5],
+            "is_special_req": row[6],
+            "province": row[7],
+            "dentist_fullname": f"{row[11]} {row[12]}",
+            "dentist_name": row[11],
+            "dentist_surname": row[12],
+            "dentist_comment": row[9],
+            "national_id": row[10]
+        }
+
+        image_manage_list.append(image)
+
+    return image_manage_list
 
