@@ -123,7 +123,7 @@ def build_conditions(data):
             u3.phone LIKE %s OR
             u3.province LIKE %s
         """)
-        params.extend([search_pattern] * 27)
+        params.extend([search_pattern] * 28)
 
     # Priority filter
     if data.get('priority'):
