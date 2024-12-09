@@ -46,7 +46,8 @@ def map_image_manage_list_data(data):
             "dentist_name": row[11],
             "dentist_surname": row[12],
             "dentist_comment": row[9],
-            "national_id": row[10]
+            "national_id": row[10],
+            "sender_job": cm.map_job_position_to_th(row[13])
         }
 
         image_manage_list.append(image)
