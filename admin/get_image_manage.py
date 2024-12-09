@@ -49,7 +49,7 @@ def fetch_image_manage_list(cursor, limit, offset, data):
             sr.special_request, sr.location_province, 
             sr.dentist_id, sr.dentist_feedback_comment,
             u1.national_id, u2.name AS dentist_name, 
-            u2.surname AS dentist_surname, u1.job_position
+            u2.surname AS dentist_surname, u1.job_position, sr.sender_id
         FROM submission_record sr
         LEFT JOIN user u1 ON sr.sender_id = u1.id
         LEFT JOIN user u2 ON sr.dentist_id = u2.id
@@ -124,6 +124,12 @@ def build_conditions(data):
             u3.province LIKE %s
         """)
         params.extend([search_pattern] * 28)
+
+    # Ai prediction filter
+    if data.get('ai_prediction'):
+        ai_prediction = set_input(data['ai_prediction'])
+        conditions.append("sr.ai_prediction LIKE %s")
+        params.append(ai_prediction)
 
     # Priority filter
     if data.get('priority'):

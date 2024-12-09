@@ -57,12 +57,14 @@ def get_image_manage():
     province = request.args.get('province')
     dentist_id = request.args.get('dentist_id')
     search_term = request.args.get('search_term')
+    ai_prediction = request.args.get('ai_prediction')
     data = {
         "priority": priority,
         "dentist_checked": dentist_checked,
         "province": province,
         "dentist_id": dentist_id,
         "search_term": search_term,
+        "ai_prediction": ai_prediction,
         "limit": limit,
         "page": page
     }

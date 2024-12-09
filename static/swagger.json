@@ -228,6 +228,12 @@ paths:
           required: false
           schema:
             type: integer
+        - name: ai_prediction
+          in: query
+          description: Prediction of ai
+          required: false
+          schema:
+            type: integer
         - name: search_term
           in: query
           description: Term to search for across all fields (e.g., name, location, etc.)
