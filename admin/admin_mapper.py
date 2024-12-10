@@ -55,3 +55,14 @@ def map_image_manage_list_data(data):
 
     return image_manage_list
 
+def map_dentist_send_list_data(data):
+    dentist_send_list = []
+    for row in data:
+        dentist= {
+            "dentist_fullname" : f"{row[0]} {row[1]}",
+            "dentist_license": row[2],
+            "dentist_id": row[3],
+        }
+
+        dentist_send_list.append(dentist)
+    return dentist_send_list

@@ -2,7 +2,7 @@ import db
 import json
 import math
 from decimal import Decimal
-from admin.admin_mapper import map_image_manage_list_data
+from admin.admin_mapper import map_dentist_send_list_data, map_image_manage_list_data
 
 
 def image_manage_list(data):
@@ -24,6 +24,10 @@ def image_manage_list(data):
 
             total_pages = math.ceil(total_count / data['limit'])
 
+            province_send_dropdown_list = fetch_province_send_dropdown_list(cursor)
+
+            dentist_send = fetch_dentist_send_dropdown_list(cursor)
+
             output = {
                 "data": image_manage_list,
                 "pagination": {
@@ -31,7 +35,9 @@ def image_manage_list(data):
                     "page": data['page'],
                     "total_count": total_count,
                     "total_pages": total_pages
-                }
+                },
+                "povince_dropdown_list": province_send_dropdown_list,
+                "dentist_dropdown_list": dentist_send
             }
     except Exception as e:
         return json.dumps({"error": f"An error occurred while fetching image records: {e}"}), 500
@@ -161,3 +167,31 @@ def build_conditions(data):
 
 def set_input(input):
     return f"%{input}%" if input else "%%"
+
+def fetch_province_send_dropdown_list(cursor):
+    query = """
+        SELECT DISTINCT location_province FROM submission_record
+    """
+    cursor.execute(query)
+    province_send_dropdown_list = cursor.fetchall()
+    province_send_dropdown_list = [province[0] for province in province_send_dropdown_list]
+    
+    return province_send_dropdown_list
+
+
+def fetch_dentist_send_dropdown_list(cursor):
+    query = """
+        SELECT DISTINCT 
+            u.name, 
+            u.surname, 
+            u.license, 
+            u.id 
+        FROM submission_record sr 
+        LEFT JOIN user u 
+        ON sr.dentist_id = u.id
+        WHERE sr.dentist_id IS NOT NULL
+    """
+    cursor.execute(query)
+    dentist_send_dropdown_list = map_dentist_send_list_data(cursor.fetchall())
+
+    return dentist_send_dropdown_list
