@@ -36,7 +36,7 @@ def image_manage_list(data):
                     "total_count": total_count,
                     "total_pages": total_pages
                 },
-                "povince_dropdown_list": province_send_dropdown_list,
+                "province_dropdown_list": province_send_dropdown_list,
                 "dentist_dropdown_list": dentist_send
             }
     except Exception as e:
