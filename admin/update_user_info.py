@@ -9,6 +9,25 @@ def update_user_info(data):
     
     try:
         with connection.cursor() as cursor:
+            update_table_user(cursor,data)
+            connection.commit()
+
+            update_table_submission_record_national_id(cursor,data)
+            connection.commit()
+            
+            output = {
+                "message": "User information updated successfully.",
+                "updated_info": data  
+            }
+    except Exception as e:
+        return json.dumps({"error": f"An error occurred while fetching user data: {e}"}), 500
+    
+    finally:
+        connection.close()
+
+    return output
+
+def update_table_user(cursor,data):
             sql = """
             UPDATE user
             SET 
@@ -43,16 +62,12 @@ def update_user_info(data):
                 data['license'], 
                 data['id'],
             ))
-            connection.commit()
-            
-            output = {
-                "message": "User information updated successfully.",
-                "updated_info": data  
-            }
-    except Exception as e:
-        return json.dumps({"error": f"An error occurred while fetching user data: {e}"}), 500
-    
-    finally:
-        connection.close()
 
-    return output
+def update_table_submission_record_national_id(cursor,data):
+            sql = """
+            UPDATE submission_record
+            SET 
+                patient_national_id = %s
+                WHERE patient_id = %s;
+            """
+            cursor.execute(sql, (data['national_id'],data['id'],))

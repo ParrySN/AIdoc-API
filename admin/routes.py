@@ -37,7 +37,7 @@ def put_submit_edited_info():
     required_fields = [
         "name", "surname", "job_position", "is_patient", "is_osm", 
         "is_specialist", "is_admin", "email", "province", "national_id", 
-        "hospital", "phone"
+        "hospital", "phone", "license", "id"
     ]
 
     for field in required_fields:
@@ -68,6 +68,7 @@ def get_image_manage():
         "limit": limit,
         "page": page
     }
+
 
     output = admin.get_image_manage_list(data)
     
