@@ -103,7 +103,7 @@ def fetch_diagnosed_submission(cursor, channel, province):
         WHERE sr.channel = %s
         AND (%s IS NULL OR sr.location_province = %s)  
         AND sr.dentist_feedback_code IS NOT NULL
-        AND sr.dentist_feedback_code IN ('Normal', 'OPMD', 'OSCC');
+        AND sr.dentist_feedback_code IN ('NORMAL', 'OPMD', 'OSCC');
         """
     cursor.execute(query, (channel, province, province,))
 
