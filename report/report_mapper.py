@@ -1,4 +1,6 @@
 from collections import defaultdict
+from decimal import Decimal
+
 def map_query_to_output_specialist(ai_predict_query, dentist_diagnose_query):
     prediction_mapping = {
         0: "normal",
@@ -9,18 +11,23 @@ def map_query_to_output_specialist(ai_predict_query, dentist_diagnose_query):
     ai_predict = defaultdict(lambda: {"normal": 0, "opmd": 0, "oscc": 0})
     total_pics = defaultdict(int)
 
-    for specialist, pred_key, score in ai_predict_query:
+    for entry in ai_predict_query:
+        specialist = entry['job_position']
+        pred_key = entry['ai_prediction']
+        score = entry['N']
         label = prediction_mapping[pred_key]
         ai_predict[specialist][label] += int(score)
         total_pics[specialist] += int(score)
 
     dentist_diagnose = defaultdict(lambda: {"agree": 0, "disagree": 0})
 
-    for specialist, diag, score in dentist_diagnose_query:
-        if diag is None:
-            continue
-        diag = diag.lower()
-        dentist_diagnose[specialist][diag] += int(score)
+    for entry in dentist_diagnose_query:
+        specialist = entry['job_position']
+        diag = entry['dentist_feedback_code']
+        score = entry['N']
+        if diag is not None:
+            diag = diag.lower()
+            dentist_diagnose[specialist][diag] += int(score)
 
     total_ai_predict = {"normal": 0, "opmd": 0, "oscc": 0}
     total_dentist_diagnose = {"agree": 0, "disagree": 0}

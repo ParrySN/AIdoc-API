@@ -4,12 +4,9 @@ from decimal import Decimal
 from common import common_mapper as cm
 
 def get_table(channel, province):
-    connection = db.connect_to_mysql()
-    if not connection:
-        return json.dumps({"error": "Failed to connect to the database."}), 500
-    
+    connection, cursor = db.get_db()
     try:
-        with connection.cursor() as cursor:
+        with cursor:
             ai_predict_query, total_pic = fetch_ai_predictions_patient_osm_table(cursor, channel, province)
             ai_predict = cm.map_ai_prediction_list(ai_predict_query)
 
@@ -18,7 +15,7 @@ def get_table(channel, province):
 
             diagnosed_submission_query = fetch_diagnosed_submission(cursor, channel, province)
             true_predict = calculate_true_predict(diagnosed_submission_query)
-            sum_dent_diagnose = sum(value for key, value in dentist_diagnose_query if key in ['OPMD', 'OSCC', 'Normal'])
+            sum_dent_diagnose = sum_dent_diagnose = sum(value for key, value in dentist_diagnose.items() if key in ['normal', 'opmd', 'oscc'])
             if sum_dent_diagnose == 0:
                 accuracy = "-"
             else:
@@ -41,7 +38,7 @@ def get_table(channel, province):
         }
 
     finally:
-        connection.close()
+        db.close_db()
 
     return output
 
@@ -60,14 +57,14 @@ def fetch_ai_predictions_patient_osm_table(cursor, channel, province):
     LEFT JOIN submission_record sr
         ON sr.channel = %s 
         AND sr.ai_prediction = ai_prediction_mapping.ai_prediction
-        AND (%s IS NULL OR sr.location_province = %s)  -- This condition handles the province filter
+        AND (%s IS NULL OR sr.location_province = %s)  
     GROUP BY ai_prediction_mapping.ai_prediction
     ORDER BY ai_prediction_mapping.ai_prediction ASC;
     """
     cursor.execute(query, (channel, province,province,))
 
     ai_predict_query = cursor.fetchall()
-    total_pic = sum(value for key, value in ai_predict_query)
+    total_pic = sum(item['N'] for item in ai_predict_query)
     
     return ai_predict_query, total_pic
 
@@ -99,10 +96,12 @@ def fetch_dentist_feedback(cursor, channel, province):
 
 def fetch_diagnosed_submission(cursor, channel, province):
     query = """
-        SELECT ai_prediction, dentist_feedback_code
+        SELECT 
+        ai_prediction, 
+        dentist_feedback_code
         FROM submission_record sr
         WHERE sr.channel = %s
-        AND (%s IS NULL OR sr.location_province = %s)  -- Conditional check for province
+        AND (%s IS NULL OR sr.location_province = %s)  
         AND sr.dentist_feedback_code IS NOT NULL
         AND sr.dentist_feedback_code IN ('Normal', 'OPMD', 'OSCC');
         """
@@ -111,7 +110,10 @@ def fetch_diagnosed_submission(cursor, channel, province):
     return cursor.fetchall()
 
 def calculate_true_predict(input_data):
-    prediction_mapping = {0: "Normal", 1: "OPMD", 2: "OSCC"}
-    true_predict = sum(1 for predicted_class, expected_class in input_data
-                       if prediction_mapping.get(predicted_class) == expected_class)
+    prediction_mapping = {0: "NORMAL", 1: "OPMD", 2: "OSCC"}
+    true_predict = sum(
+        1 for item in input_data
+        if prediction_mapping.get(item['ai_prediction']) == item['dentist_feedback_code']
+    )
     return true_predict
+

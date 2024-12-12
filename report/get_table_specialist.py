@@ -5,21 +5,22 @@ from collections import defaultdict
 from report.report_mapper import map_query_to_output_specialist
 
 def get_table(province):
-    connection = db.connect_to_mysql()
-    if not connection:
-        return {"error": "Failed to connect to the database."}, 500
-
+    connection, cursor = db.get_db()
     try:
-        with connection.cursor() as cursor:
+        with cursor:
             ai_predict_query, dentist_diagnose_query = fetch_data(cursor, province)
             output =  map_query_to_output_specialist(ai_predict_query, dentist_diagnose_query)
-
     except Exception as e:
         print(f"Error: {e}")
-        return reset_output()
+        return {
+            "accuracy": "-",
+            "ai_predict": {"normal": 0, "opmd": 0, "oscc": 0},
+            "dentist_diagnose": {"agree": 0, "disagree": 0},
+            "total_pic": 0
+        }
 
     finally:
-        connection.close()
+        db.close_db()
         
     return output
 
@@ -110,10 +111,3 @@ def fetch_dentist_diagnoses(cursor, province):
     cursor.execute(query, (province, province, province, province,))
     return cursor.fetchall()
 
-def reset_output():
-    return {
-        "accuracy": "-",
-        "ai_predict": {"normal": 0, "opmd": 0, "oscc": 0},
-        "dentist_diagnose": {"agree": 0, "disagree": 0},
-        "total_pic": 0
-    }
