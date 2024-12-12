@@ -24,11 +24,11 @@ def get_table(province):
     return output
 
 def fetch_data(cursor, province):
-    ai_predict_query = fetch_ai_predictions(cursor, province)
+    ai_predict_query = fetch_ai_predictions_dentist_table(cursor, province)
     dentist_diagnose_query = fetch_dentist_diagnoses(cursor, province)
     return ai_predict_query, dentist_diagnose_query
 
-def fetch_ai_predictions(cursor, province):
+def fetch_ai_predictions_dentist_table(cursor, province):
     query = """
         SELECT 
             job_position_mapping.job_position,

@@ -10,7 +10,7 @@ def get_table(channel, province):
     
     try:
         with connection.cursor() as cursor:
-            ai_predict_query, total_pic = fetch_ai_predictions(cursor, channel, province)
+            ai_predict_query, total_pic = fetch_ai_predictions_patient_osm_table(cursor, channel, province)
             ai_predict = cm.map_ai_prediction_list(ai_predict_query)
 
             dentist_diagnose_query = fetch_dentist_feedback(cursor, channel, province)
@@ -46,7 +46,7 @@ def get_table(channel, province):
     return output
 
 
-def fetch_ai_predictions(cursor, channel, province):
+def fetch_ai_predictions_patient_osm_table(cursor, channel, province):
     
     query ="""
     SELECT ai_prediction_mapping.ai_prediction, COUNT(sr.ai_prediction) AS N

@@ -10,7 +10,7 @@ def get_all_submission(province):
 
     try:
         with connection.cursor() as cursor:
-            ai_predict_query, total_pic = fetch_ai_predictions(cursor, province)
+            ai_predict_query, total_pic = fetch_all_ai_predictions_count(cursor, province)
             
             ai_predict = cm.map_ai_prediction_list(ai_predict_query)
             
@@ -35,7 +35,7 @@ def get_all_submission(province):
         
     return output
 
-def fetch_ai_predictions(cursor, province):
+def fetch_all_ai_predictions_count(cursor, province):
     if province:
         query = """
         SELECT ai_prediction, COUNT(*) as N 
