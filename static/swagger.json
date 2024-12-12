@@ -12,133 +12,297 @@ tags:
   - name: admin
     description: Admin management 
 paths:
-  /report:
+  /admin_page:
     get:
       tags:
-        - report
-      summary: Get a comprehensive report
-      parameters:
-        - name: province
-          in: query
-          required: false
-          description: Province for which the report is requested (in Thai).
-          schema:
-            type: string
-            example: "เชียงใหม่"
+        - admin
+      summary: Get list of users
       responses:
         '200':
           description: Successful operation
           content:
             application/json:
               example:
-                {
-                  "patient_and_osm": {
-                    "osm": {
-                      "accuracy": "100.00",
-                      "ai_predict": {
-                        "normal": 0,
-                        "opmd": 3,
-                        "oscc": 1
-                      },
-                      "dentist_diagnose": {
-                        "normal": 0,
-                        "not_diagnosed": 0,
-                        "opmd": 3,
-                        "oscc": 1,
-                        "others": 0,
-                        "poor_image": 0
-                      },
-                      "total_pic": 4
-                    },
-                    "patient": {
-                      "accuracy": "50.00",
-                      "ai_predict": {
-                        "normal": 1,
-                        "opmd": 0,
-                        "oscc": 1
-                      },
-                      "dentist_diagnose": {
-                        "normal": 0,
-                        "not_diagnosed": 1,
-                        "opmd": 0,
-                        "oscc": 1,
-                        "others": 0,
-                        "poor_image": 0
-                      },
-                      "total_pic": 2
-                    },
-                    "total": {
-                      "accuracy": "75.00",
-                      "ai_predict": {
-                        "normal": 1,
-                        "opmd": 3,
-                        "oscc": 2
-                      },
-                      "dentist_diagnose": {
-                        "normal": 0,
-                        "not_diagnosed": 1,
-                        "opmd": 3,
-                        "oscc": 2,
-                        "others": 0,
-                        "poor_image": 0
-                      },
-                      "total_pic": 6
-                    }
-                  },
-                  "province": "เชียงใหม่",
-                  "specialist": [
-                    {
-                      "ai_predict": {
-                        "normal": 4,
-                        "opmd": 4,
-                        "oscc": 1
-                      },
-                      "dentist_diagnose": {
-                        "agree": 0,
-                        "disagree": 0
-                      },
-                      "job": "Computer Technical Officer",
-                      "total_pic": 9
-                    },
-                    {
-                      "ai_predict": {
-                        "normal": 1,
-                        "opmd": 4,
-                        "oscc": 2
-                      },
-                      "dentist_diagnose": {
-                        "agree": 3,
-                        "disagree": 1
-                      },
-                      "job": "Oral Pathologist",
-                      "total_pic": 7
-                    },
-                    {
-                      "ai_predict": {
-                        "normal": 5,
-                        "opmd": 8,
-                        "oscc": 3
-                      },
-                      "dentist_diagnose": {
-                        "agree": 3,
-                        "disagree": 1
-                      },
-                      "job": "total",
-                      "total_pic": 16
-                    }
-                  ],
-                  "total_pic": {
-                    "ai_predict": {
-                      "normal": 6,
-                      "opmd": 11,
-                      "oscc": 5
-                    },
-                    "total_pic": 22
-                  }
-                }
-        '500':
-          description: Failed to connect to the database.
+                # Example user list here
+  /delete_user/:
+    delete:
+      tags:
+        - admin
+      summary: Delete a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  description: The ID of the user to delete.
+                  example: 123
+      responses:
+        '200':
+          description: User deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User with ID 123 deleted successfully.
+        '400':
+          description: No user ID provided
           content:
             application/json:
               example:
-                error: "Failed to connect to the database."
+                error: "No user ID provided"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              example:
+                error: "An error occurred while deleting the user."
+  /edit_user_info/:
+      get:
+        tags:
+          - admin
+        summary: Get information for editing a specific user
+        parameters:
+          - name: id
+            in: query
+            required: true
+            description: The ID of the user to fetch information for editing.
+            schema:
+              type: integer
+              example: 123
+        responses:
+          '200':
+            description: User information retrieved successfully
+            content:
+              application/json:
+                example:
+                  data:
+                    id: 123
+                    name: "John"
+                    surname: "Doe"
+                    job_position: "Technician"
+                    is_patient: 0
+                    is_osm: 1
+                    is_specialist: 0
+                    is_admin: 0
+                    email: "john.doe@example.com"
+                    province: "Chiang Mai"
+                    national_id: "1234567890123"
+                    hospital: "Chiang Mai Hospital"
+                    phone: "0801234567"
+          '400':
+            description: Missing or invalid user ID
+            content:
+              application/json:
+                example:
+                  status: "error"
+                  message: "No user ID provided."
+          '404':
+            description: User not found
+            content:
+              application/json:
+                example:
+                  status: "error"
+                  message: "User not found."
+          '500':
+            description: Internal Server Error
+            content:
+              application/json:
+                example:
+                  status: "error"
+                  message: "An internal error occurred."
+  /submit_info/:
+    put:
+      tags:
+        - admin
+      summary: Submit updated user information
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "John"
+                surname:
+                  type: string
+                  example: "Doe"
+                job_position:
+                  type: string
+                  example: "Specialist"
+                is_patient:
+                  type: boolean
+                  example: false
+                is_osm:
+                  type: boolean
+                  example: true
+                is_specialist:
+                  type: boolean
+                  example: true
+                is_admin:
+                  type: boolean
+                  example: false
+                email:
+                  type: string
+                  example: "john.doe@example.com"
+                province:
+                  type: string
+                  example: "กรุงเทพมหานคร"
+                national_id:
+                  type: string
+                  example: "1234567890123"
+                hospital:
+                  type: string
+                  example: "Bangkok Hospital"
+                phone:
+                  type: string
+                  example: "0812345678"
+      responses:
+        '200':
+          description: User information updated successfully
+          content:
+            application/json:
+              example:
+                message: "User information updated successfully."
+        '400':
+          description: Missing required fields
+          content:
+            application/json:
+              example:
+                error: "Missing required field: phone"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              example:
+                error: "An error occurred while updating user information."
+  /image_manage:
+    get:
+      tags:
+        - admin
+      summary: Get list of submission images
+      parameters:
+        - name: limit
+          in: query
+          description: Number of items per page
+          required: false
+          schema:
+            type: integer
+            default: 10
+        - name: page
+          in: query
+          description: The page number to fetch
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - name: priority
+          in: query
+          description: Priority filter for submission (e.g., high, medium, low)
+          required: false
+          schema:
+            type: string
+        - name: dentist_checked
+          in: query
+          description: Indicates if the dentist has reviewed the submission
+          required: false
+          schema:
+            type: boolean
+        - name: province
+          in: query
+          description: Province filter for location
+          required: false
+          schema:
+            type: string
+        - name: dentist_id
+          in: query
+          description: Dentist ID to filter submissions
+          required: false
+          schema:
+            type: integer
+        - name: ai_prediction
+          in: query
+          description: Prediction of ai
+          required: false
+          schema:
+            type: integer
+        - name: search_term
+          in: query
+          description: Term to search for across all fields (e.g., name, location, etc.)
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    fname:
+                      type: string
+                    created_at:
+                      type: string
+                      format: date-time
+                    ai_prediction:
+                      type: string
+                    user_name:
+                      type: string
+                    user_surname:
+                      type: string
+                    special_request:
+                      type: string
+                    location_province:
+                      type: string
+                    dentist_id:
+                      type: integer
+                    dentist_feedback_comment:
+                      type: string
+                    national_id:
+                      type: string
+                    dentist_name:
+                      type: string
+                    dentist_surname:
+                      type: string
+              example:
+                - id: 1
+                  fname: "Image 1"
+                  created_at: "2024-12-08T10:00:00Z"
+                  ai_prediction: "Healthy"
+                  user_name: "John"
+                  user_surname: "Doe"
+                  special_request: "No"
+                  location_province: "Ontario"
+                  dentist_id: 123
+                  dentist_feedback_comment: "Good image"
+                  national_id: "123456789"
+                  dentist_name: "Dr. Smith"
+                  dentist_surname: "Williams"
+                - id: 2
+                  fname: "Image 2"
+                  created_at: "2024-12-08T10:05:00Z"
+                  ai_prediction: "Cavity detected"
+                  user_name: "Jane"
+                  user_surname: "Smith"
+                  special_request: "Yes"
+                  location_province: "Quebec"
+                  dentist_id: 456
+                  dentist_feedback_comment: "Follow-up needed"
+                  national_id: "987654321"
+                  dentist_name: "Dr. Johnson"
+                  dentist_surname: "Brown"
+
+
