@@ -49,7 +49,7 @@ def calculate_totals(patient_data, osm_data, dentist_data, output):
 
         output['patient_and_osm']['total']['accuracy'] = calculate_accuracy(osm_data, patient_data)
 
-        output['patient_and_osm']['total']['total_pic'] = osm_da    ta.get('total_pic', 0) + patient_data.get('total_pic', 0)
+        output['patient_and_osm']['total']['total_pic'] = osm_data.get('total_pic', 0) + patient_data.get('total_pic', 0)
 
     except Exception as e:
         print(f"Error occurred while calculating total: {e}")
