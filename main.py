@@ -1,7 +1,7 @@
 from flask import Flask, jsonify
 # from report import report_bp
 # from admin import admin_bp
-from login import login_bp
+from patient import patient_edit_bp
 from flask_swagger_ui import get_swaggerui_blueprint
 from flask_cors import CORS
 # from products import products_bp
@@ -25,7 +25,7 @@ app.register_blueprint(SWAGGERUI_BLUEPRINT, url_prefix=SWAGGER_URL)
 # Register Blueprints
 # app.register_blueprint(report_bp, url_prefix='/')
 # app.register_blueprint(admin_bp, url_prefix='/')
-app.register_blueprint(login_bp, url_prefix='/')
+app.register_blueprint(patient_edit_bp, url_prefix='/')
 
 
 app.json.ensure_ascii=False

@@ -7,53 +7,49 @@ info:
 servers:
   - url: http://127.0.0.1:5000
 tags:
-  - name: login
-    description: Login verification
+  - name: edit
+    description: Patient edit page
 paths:
-  /verify/passkey/:
+  /patient/edit/:
     get:
       tags:
-        - login
-      summary: Verify user credentials
-      description: Verifies a user by username/password or by thid/mobile using query parameters.
+        - edit
+      summary: Get user info for edit
+      description: Get patient info for edit page.
       parameters:
-        - name: username
+        - name: user_id
           in: query
-          required: false
+          required: true
           schema:
-            type: string
-            example: tester1
-          description: Username of the user.
-        - name: password
-          in: query
-          required: false
-          schema:
-            type: string
-            example: P@ssword
-          description: Password of the user.
-        - name: thid
-          in: query
-          required: false
-          schema:
-            type: string
-          description: Thai ID of the user.
-        - name: mobile
-          in: query
-          required: false
-          schema:
-            type: string
-          description: Mobile number of the user.
+            type: integer
+            example: 1
+          description: The ID of the user whose information is being retrieved.
       responses:
         "200":
-          description: User verified successfully
+          description: Get user info successfully
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  message:
+                  name:
                     type: string
-                    example: valid credential.
+                    example: firstname
+                  surname:
+                    type: string
+                    example: lastname
+                  job:
+                    type: string
+                    example: นักศึกษา
+                  province:
+                    type: string
+                    example: เชียงใหม่
+                  email:
+                    type: email
+                    example: example@mail.com
+                  phone:
+                    type: string
+                    example: 0123456789
         "400":
           description: Bad request due to missing or invalid input
           content:
@@ -63,9 +59,9 @@ paths:
                 properties:
                   error:
                     type: string
-                    example: Invalid request format. Provide either username/password or thid/mobile.
-        "401":
-          description: Unauthorized due to invalid credentials
+                    example: user id not provided.
+        "404":
+          description: Not founded.
           content:
             application/json:
               schema:
@@ -73,7 +69,7 @@ paths:
                 properties:
                   error:
                     type: string
-                    example: invalid username/password or thid/mobile.
+                    example: user not found.
         "500":
           description: Internal server error
           content:
@@ -85,3 +81,58 @@ paths:
                     type: string
                     example:
                       An error occurred: Internal Server Error
+    put:
+      tags:
+        - edit
+      summary: Verify user credentials
+      description: Verifies a user by username/password or by thid/mobile using query parameters.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: int
+                  example: 0
+                name:
+                  type: string
+                  example: John
+                surname:
+                  type: string
+                  example: Doe
+                job:
+                  type: string
+                  example: Specialist
+                province:
+                  type: string
+                  example: กรุงเทพมหานคร
+                email:
+                  type: string
+                  example: john.doe@example.com
+                phone:
+                  type: string
+                  example: 0812345678
+      responses:
+        "200":
+          description: User info update successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: updated user info.
+        "400":
+          description: Bad request due to missing or invalid input
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Invalid request format. No or missing fields.
+
