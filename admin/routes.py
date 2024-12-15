@@ -4,7 +4,6 @@ from admin import admin
 
 admin_bp = Blueprint('admin', __name__)
 
-
 @admin_bp.route('/admin_page/', methods=['GET'])
 def get_admin_page():
     return admin.generate_admin_page()

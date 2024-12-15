@@ -4,12 +4,9 @@ import json
 from decimal import Decimal
 
 def users_list():
-    connection = db.connect_to_mysql()
-    if not connection:
-        return json.dumps({"error": "Failed to connect to the database."}), 500
-    
+    connection, cursor = db.get_db()
     try:
-        with connection.cursor() as cursor:
+        with cursor:
             user_list_query = fetch_user_list(cursor)
             user_list = map_user_list_data(user_list_query)
 
@@ -18,7 +15,7 @@ def users_list():
         return json.dumps({"error": f"An error occurred while fetching user accounts: {e}"}),500
     
     finally:
-        connection.close()
+        db.close_db()
     
     return output
 

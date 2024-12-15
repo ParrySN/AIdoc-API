@@ -15,7 +15,7 @@ def generate_report(province):
     output = build_initial_output(province, patient_data, osm_data, dentist_data, total_pic)
     output = calculate_totals(patient_data, osm_data, dentist_data, output)
 
-    return jsonify(output)
+    return output
 
 
 def build_initial_output(province, patient_data, osm_data, dentist_data, total_pic):
