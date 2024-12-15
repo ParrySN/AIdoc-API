@@ -10,7 +10,6 @@ def generate_report(province):
     osm_data = get_table_patient_and_osm.get_table("OSM", province)
     dentist_data = get_table_specialist.get_table(province)
     total_pic = get_all_submission.get_all_submission(province)
-    print(total_pic)
 
     output = build_initial_output(province, patient_data, osm_data, dentist_data, total_pic)
     output = calculate_totals(patient_data, osm_data, dentist_data, output)
