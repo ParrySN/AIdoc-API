@@ -1,12 +1,20 @@
 import datetime
 import os
-from flask import json, jsonify, flash
+from flask import json, jsonify, current_app
 from werkzeug.utils import secure_filename
+from PIL import Image, ImageFilter
 import db
+import ast
+import cv2
+import numpy as np
+import tensorflow as tf
+import common.image_quality_checker as image_quality_checker
+
+qualityChecker = image_quality_checker.image_quality_checker()
 
 def init_record(data,imageList):
     output = {}
-    # session['sender_mode'] = role //check role
+    session['sender_mode'] = role
     submission = data['is_submit']
     if request.method == 'POST':
         if data['is_rotate']=='true': # Rotate the image
@@ -35,9 +43,9 @@ def init_record(data,imageList):
                     qualityResults = qualityChecker.predict(pil_img)
                     print(qualityResults['Class_Name'])
                     if qualityResults['Class_ID'] == 0:
-                        flash(f'ระบบตรวจสอบพบว่าไฟล์ {imageName} คุณภาพของรูปไม่ได้มาตรฐาน ภาพช่องปากอาจไม่ชัด (เบลอ) หรือมืดเกินไป (เปิดไฟส่องสว่างช่องปากด้วย) กรุณานำส่งรูปที่ได้คุณภาพเท่านั้น')
+                        return  json.dumps({"error": f'ระบบตรวจสอบพบว่าไฟล์ {imageName} คุณภาพของรูปไม่ได้มาตรฐาน ภาพช่องปากอาจไม่ชัด (เบลอ) หรือมืดเกินไป (เปิดไฟส่องสว่างช่องปากด้วย) กรุณานำส่งรูปที่ได้คุณภาพเท่านั้น'}), 400
                     elif qualityResults['Class_ID'] == 1:
-                        flash(f'ระบบตรวจสอบพบว่าไฟล์ {imageName} ไม่ปรากฎช่องปากในภาพ กรุณานำส่งภาพถ่ายที่ได้มุมมองมาตรฐานตามตัวอย่างเท่านั้น')
+                        return  json.dumps({"error": f'ระบบตรวจสอบพบว่าไฟล์ {imageName} ไม่ปรากฎช่องปากในภาพ กรุณานำส่งภาพถ่ายที่ได้มุมมองมาตรฐานตามตัวอย่างเท่านั้น'}), 400
                     output['imageQuality'] = qualityResults['Class_ID']
 
                     pil_img = create_thumbnail(pil_img)
@@ -45,7 +53,7 @@ def init_record(data,imageList):
                     # Save the current filenames on session for the upcoming prediction
                     imageNameList.append(imageName)
                 else:
-                    flash(f'ไฟล์ {imageName} ไม่ใช่ชนิดรูปภาพที่กำหนด ระบบรับข้อมูลเฉพาะที่เป็นชนิดรูปภาพที่กำหนดเท่านั้น')
+                    return  json.dumps({"error": f'ไฟล์ {imageName} ไม่ใช่ชนิดรูปภาพที่กำหนด ระบบรับข้อมูลเฉพาะที่เป็นชนิดรูปภาพที่กำหนดเท่านั้น'}), 400
             if len(imageList)>0:
                 # Save the current filenames on session for the upcoming prediction
                 session['imageNameList'] = imageNameList
@@ -117,7 +125,7 @@ def init_record(data,imageList):
                     session.pop('patient_id', None)
                     session.pop('location', None)
                 return redirect(url_for('image.diagnosis', role=role, img_id=result['id']))
-    return output
+    return render_template(role+"_upload.html", data=data)
 
 # region rotate_temp_image
 def rotate_temp_image(imagename):
@@ -134,3 +142,286 @@ def rotate_temp_image(imagename):
 def allowed_file(filename):
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'tif', 'tiff'}
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+# region create_thumbnail
+def create_thumbnail(pil_img):
+    MAX_SIZE = 342
+    width = pil_img.size[0]
+    height = pil_img.size[1]
+    if height < MAX_SIZE:
+        new_height = MAX_SIZE
+        new_width  = int(new_height * width / height)
+        pil_img = pil_img.resize((new_width, new_height), Image.NEAREST)
+        if new_width > MAX_SIZE:
+            canvas = Image.new(pil_img.mode, (new_width, new_width), (255, 255, 255))
+            canvas.paste(pil_img)
+            pil_img = canvas.resize((MAX_SIZE, MAX_SIZE), Image.NEAREST)
+    else:
+        pil_img.thumbnail((MAX_SIZE,MAX_SIZE))
+    return pil_img
+
+# Upload Submission Module
+def upload_submission_module(target_user_id):
+    if session['imageNameList']:
+        # Define the related directories
+        tempDir = os.path.join(current_app.config['IMAGE_DATA_DIR'], 'temp')
+
+        # Model prediction
+        ai_predictions = []
+        ai_scores = []
+        for i, filename in enumerate(session['imageNameList']):
+            imgPath = os.path.join(tempDir, filename)
+            outlined_img, prediction, scores, mask = oral_lesion_prediction(imgPath)
+
+            outlined_img.save(os.path.join(tempDir, 'outlined_'+filename))
+            mask.save(os.path.join(tempDir, 'mask_'+filename))
+
+            #Create the thumbnail and saved to temp folder
+            pil_img = Image.open(os.path.join(tempDir, 'outlined_'+filename)) 
+            pil_img = create_thumbnail(pil_img)
+            pil_img.save(os.path.join(current_app.config['IMAGE_DATA_DIR'], 'temp', 'thumb_outlined_' + filename)) 
+
+            ai_predictions.append(prediction)
+            ai_scores.append(str(scores))
+        
+        if session['imageNameList']:
+            session['ai_predictions'] = ai_predictions
+            session['ai_infos'] = ai_scores
+        else:
+            session.pop('ai_predictions', None)
+            session.pop('ai_infos', None)
+        
+        # Create directory for the user (using user_id) if not exist
+        user_id = str(target_user_id)
+        uploadDir = os.path.join(current_app.config['IMAGE_DATA_DIR'], 'upload', user_id)
+        thumbUploadDir = os.path.join(current_app.config['IMAGE_DATA_DIR'], 'upload', 'thumbnail', user_id)
+        outlinedDir = os.path.join(current_app.config['IMAGE_DATA_DIR'], 'outlined', user_id)
+        thumbOutlinedDir = os.path.join(current_app.config['IMAGE_DATA_DIR'], 'outlined', 'thumbnail', user_id)
+        maskDir = os.path.join(current_app.config['IMAGE_DATA_DIR'], 'mask', user_id)
+        os.makedirs(uploadDir, exist_ok=True)
+        os.makedirs(thumbUploadDir, exist_ok=True)
+        os.makedirs(outlinedDir, exist_ok=True)
+        os.makedirs(thumbOutlinedDir, exist_ok=True)
+        os.makedirs(maskDir, exist_ok=True)
+
+        # Copy files to the storage
+        checked_filename_lst = []
+        for filename in session['imageNameList']:
+            if os.path.isfile(os.path.join(tempDir, filename)):
+
+                checked_filename = rename_if_duplicated(uploadDir, filename)
+
+                shutil.copy2(os.path.join(tempDir, filename), os.path.join(uploadDir, checked_filename))
+                shutil.copy2(os.path.join(tempDir, 'thumb_'+filename), os.path.join(thumbUploadDir, checked_filename))
+                shutil.copy2(os.path.join(tempDir, 'outlined_'+filename), os.path.join(outlinedDir, checked_filename))
+                shutil.copy2(os.path.join(tempDir, 'thumb_outlined_'+filename), os.path.join(thumbOutlinedDir, checked_filename))
+                shutil.copy2(os.path.join(tempDir, 'mask_'+filename), os.path.join(maskDir, checked_filename))
+
+                checked_filename_lst.append(checked_filename)
+        session['imageNameList'] = checked_filename_lst
+
+        # Try to clear temp folder if #files are more than CLEAR_TEMP_THRESHOLD
+        if len(os.listdir(tempDir)) > current_app.config['CLEAR_TEMP_THRESHOLD']:
+            for filename in os.listdir(tempDir):
+                if os.path.isfile(os.path.join(tempDir, filename)):
+                    os.remove(os.path.join(tempDir, filename))
+
+        # Add the prediction record to the database
+        for i, filename in enumerate(session['imageNameList']):
+            connection, cursor = db.get_db()
+            
+            if session['sender_mode']=='dentist':
+                
+                if g.user['default_location'] is None or str(g.user['default_location'])!=str(session['location']):
+                    sql = "UPDATE user SET default_location=%s WHERE id=%s"
+                    val = (str(session['location']), session['user_id'])
+                    cursor.execute(sql, val)
+                    load_logged_in_user()
+
+                sql = '''INSERT INTO submission_record
+                    (fname,
+                    sender_id,
+                    location_district,
+                    location_amphoe,
+                    location_province,
+                    location_zipcode,
+                    ai_prediction,
+                    ai_scores,
+                    channel)
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)'''
+                val = (filename,
+                       session['user_id'],
+                       session['location']['district'],
+                       session['location']['amphoe'],
+                       session['location']['province'],
+                       session['location']['zipcode'],
+                       ai_predictions[i],
+                       ai_scores[i],
+                       'DENTIST')
+                cursor.execute(sql, val)
+
+
+            elif session['sender_mode']=='patient':
+
+                if g.user['default_location'] is None or str(g.user['default_location'])!=str(session['location']):
+                    sql = "UPDATE user SET default_location=%s WHERE id=%s"
+                    val = (str(session['location']), session['user_id'])
+                    cursor.execute(sql, val)
+                    load_logged_in_user()
+
+                if 'sender_phone' in session and session['sender_phone']:
+                    sql = "UPDATE user SET default_sender_phone=%s WHERE id=%s"
+                    val = (session['sender_phone'], session['user_id'])
+                    cursor.execute(sql, val)
+                    load_logged_in_user()
+                
+                if (g.user['default_sender_phone'] and ('sender_phone' not in session or session['sender_phone'] is None)):
+                    sql = "UPDATE user SET default_sender_phone=NULL WHERE id=%s"
+                    val = (session['user_id'], )
+                    cursor.execute(sql, val)
+                    load_logged_in_user()
+                
+                sql = '''INSERT INTO submission_record 
+                        (fname,
+                        sender_id,
+                        sender_phone,
+                        location_district,
+                        location_amphoe,
+                        location_province,
+                        location_zipcode,
+                        patient_id,
+                        ai_prediction,
+                        ai_scores,
+                        channel)
+                        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'''
+                val = (filename,
+                        session['sender_id'],
+                        session['sender_phone'],
+                        session['location']['district'],
+                        session['location']['amphoe'],
+                        session['location']['province'],
+                        session['location']['zipcode'],
+                        session['user_id'],
+                        ai_predictions[i],
+                        ai_scores[i],
+                        'PATIENT')
+                cursor.execute(sql, val)
+                
+                cursor.execute("SELECT LAST_INSERT_ID()")
+                row = cursor.fetchone()
+                sql = "INSERT INTO patient_case_id (id) VALUES (%s)"
+                val = (row['LAST_INSERT_ID()'],)
+                cursor.execute(sql, val)
+
+            elif session['sender_mode']=='osm':
+
+                if g.user['default_location'] is None or str(g.user['default_location'])!=str(session['location']):
+                    sql = "UPDATE user SET default_location=%s WHERE id=%s"
+                    val = (str(session['location']), session['user_id'])
+                    cursor.execute(sql, val)
+                    load_logged_in_user()
+
+                sql = '''INSERT INTO submission_record 
+                        (fname, 
+                        sender_id,
+                        location_district,
+                        location_amphoe,
+                        location_province,
+                        location_zipcode,
+                        patient_id,
+                        patient_national_id,
+                        ai_prediction,
+                        ai_scores,
+                        channel)
+                        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'''
+                val = (filename,
+                        session['user_id'],
+                        session['location']['district'],
+                        session['location']['amphoe'],
+                        session['location']['province'],
+                        session['location']['zipcode'],
+                        session['patient_id'],
+                        session['patient_national_id'],
+                        ai_predictions[i],
+                        ai_scores[i],
+                        'OSM')
+                cursor.execute(sql, val)
+
+                cursor.execute("SELECT LAST_INSERT_ID()")
+                row = cursor.fetchone()
+                sql = "INSERT INTO patient_case_id (id) VALUES (%s)"
+                val = (row['LAST_INSERT_ID()'],)
+                cursor.execute(sql, val)
+
+
+# AI Prediction Engine
+def oral_lesion_prediction(imgPath):
+    
+    #import tensorflow as tf
+    
+    img = tf.keras.utils.load_img(imgPath, target_size=(342, 512, 3))
+    img = tf.expand_dims(img, axis=0)
+
+    global model
+    pred_mask = model.predict(img)
+
+    output_mask = tf.math.argmax(pred_mask, axis=-1)
+    output_mask = output_mask[..., tf.newaxis]
+    output_mask = output_mask[0]
+
+    predictionMask = tf.math.not_equal(output_mask, 0)
+    
+    ### The Connected Component Analysis, requires OpenCV ##########
+    analysis = cv2.connectedComponentsWithStats(predictionMask.numpy().astype(dtype='uint8'), 4, cv2.CV_32S)
+    (numLabels, labels, stats, centroid) = analysis
+    output = np.zeros((342, 512), dtype="uint8")
+    maxArea = 0
+    for i in range(1, numLabels):
+        area = stats[i, cv2.CC_STAT_AREA]
+        maxArea = max(maxArea, area)
+        if area > 500: 
+            componentMask = (labels == i).astype("uint8")*255
+            output = cv2.bitwise_or(output, componentMask) 
+    predictionMask = tf.convert_to_tensor(output)
+    predictionMask = tf.math.equal(predictionMask, 255)
+    predictionMask = predictionMask[..., tf.newaxis]
+    ################################################################
+
+    pred_mask = tf.squeeze(pred_mask, axis=0)  # Remove batch dimension
+    backgroundChannel = pred_mask[:,:,0]
+    opmdChannel = pred_mask[:,:,1]
+    osccChannel = pred_mask[:,:,2]
+    
+    #predictionMaskSum = tf.reduce_sum(tf.cast(predictionMask,  tf.int64)) # Count number of pixels in prediction mask
+    predictionIndexer = tf.squeeze(predictionMask, axis=-1) # Remove singleton dimension (last index)
+    if maxArea>500: # Threshold to cut noises are 500 pixels
+        opmdScore = tf.reduce_mean(opmdChannel[predictionIndexer])
+        osccScore = tf.reduce_mean(osccChannel[predictionIndexer])
+        backgroundScore = tf.reduce_mean(backgroundChannel[predictionIndexer])
+        if opmdScore>osccScore:
+            predictClass = 1
+        else:
+            predictClass = 2
+    else:
+        backgroundIndexer = tf.math.logical_not(predictionIndexer)
+        opmdScore = tf.reduce_mean(opmdChannel[backgroundIndexer])
+        osccScore = tf.reduce_mean(osccChannel[backgroundIndexer])
+        backgroundScore = tf.reduce_mean(backgroundChannel[backgroundIndexer])
+        predictClass = 0
+
+    # Pillow is used to create the boundary
+    # Pillow has a very strong relationship with tensorflow
+    output = tf.keras.utils.array_to_img(predictionMask)
+    edge_img = output.filter(ImageFilter.FIND_EDGES)
+    dilation_img = edge_img.filter(ImageFilter.MaxFilter(3))
+
+    full_img = Image.open(imgPath)
+    full_dilation_img = dilation_img.resize(full_img.size, resample=Image.NEAREST)
+    mask = output.resize(full_img.size, resample=Image.NEAREST)
+
+    yellow_edge = Image.merge("RGB", (full_dilation_img, full_dilation_img, Image.new(mode="L", size=full_dilation_img.size)))
+    outlined_img = full_img.copy()
+    outlined_img.paste(yellow_edge, full_dilation_img)
+    
+    scores = [backgroundScore.numpy(), opmdScore.numpy(), osccScore.numpy()]
+    return outlined_img, predictClass, scores, mask
