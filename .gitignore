@@ -8,4 +8,4 @@ instance/*
 aidoc/__pycache__/*
 oralLesionNet/*
 imageData/*
-imageQualityChecker/imageQualityChecker.tflite
+common/image_quality_checker.py
