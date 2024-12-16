@@ -22,14 +22,14 @@ paths:
           required: false
           schema:
             type: string
-            example: tester1
+            example: adminbest
           description: Username of the user.
         - name: password
           in: query
           required: false
           schema:
             type: string
-            example: P@ssword
+            example: 12345678
           description: Password of the user.
         - name: thid
           in: query
@@ -74,14 +74,40 @@ paths:
                   error:
                     type: string
                     example: invalid username/password or thid/mobile.
-        "500":
-          description: Internal server error
+  /get_user:
+    get:
+      tags:
+        - login
+      summary: Hash the user password
+      description: This endpoint hashes the provided password using a secure hashing algorithm and returns the hashed password.
+      parameters:
+        - name: password
+          in: query
+          required: true
+          schema:
+            type: string
+            example: P@ssword
+          description: Password to be hashed.
+      responses:
+        "200":
+          description: Password hashed successfully
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  error:
+                  hashed_password:
                     type: string
-                    example:
-                      An error occurred: Internal Server Error
+      security:
+        - BearerAuth: []  # Add security definition for this route
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT  # Specifies that the security scheme is JWT token
+
+security:
+  - BearerAuth: []  # Global security requirement for all routes
+

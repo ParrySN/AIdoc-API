@@ -1,50 +1,44 @@
-from flask import json
-from werkzeug.security import check_password_hash
+from flask import json,jsonify
+from flask_jwt_extended import create_access_token
+from werkzeug.security import check_password_hash, generate_password_hash
 import db
 
 def verify_by_username_password(username, password):
-    connection = db.connect_to_mysql()
-    if not connection:
-        return json.dumps({"error": "failed to connect to the database."}), 500
+    query = "SELECT * FROM user WHERE username = %s"
+    user, error = get_user_by_query(query, (username,))
     
-    try:
-        with connection.cursor() as cursor:
-            sql = """SELECT username, password FROM user WHERE username = %s"""
-            cursor.execute(sql, (username,))
-            user = cursor.fetchone()
-            
-            if not user: return json.dumps({"error": "invalid username"}), 401
-            
-            hashed_password = user[1]
-            if check_password_hash(hashed_password, password):
-                return json.dumps({"message": "valid credential."}), 200
-            
-            return json.dumps({"error": "invalid password."}), 401
-
-    except Exception as e:
-        return json.dumps({"error": f"an error occurred while verifying passkey by username and password: {str(e)}"}), 500
+    if error:
+        return jsonify({"error": error}), 500
+    if user is None:
+        return jsonify({"error": "Invalid username"}), 401
     
-    finally:
-        connection.close()
-
+    if check_password_hash(user['password'], password):
+        access_token = create_access_token(identity=str(user['id']), additional_claims=user)  # Use user ID as the identity
+        return jsonify({"access_token": access_token, "message": "Login successful"}), 200
+    else:
+        return jsonify({"error": "Invalid password"}), 401
 
 def verify_by_thid_mobile(thid, mobile):
-    connection = db.connect_to_mysql()
-    if not connection:
-        return json.dumps({"error": "failed to connect to the database."}), 500
-    
+    query = "SELECT * FROM user WHERE national_id = %s AND phone = %s"
+    user, error = get_user_by_query(query, (thid, mobile))
+
+    if error:
+        return jsonify({"error": error}), 500
+    if not user:
+        return jsonify({"error": "Invalid credentials"}), 401
+
+    access_token = create_access_token(identity=str(user['id']), additional_claims=user)  # Use user ID as the identity
+    return jsonify({"access_token": access_token, "message": "Login successful"}), 200
+
+def get_user_by_query(query, params):
+    connection, cursor = db.get_db()
     try:
-        with connection.cursor() as cursor:
-            sql = """SELECT national_id, phone FROM user WHERE national_id = %s AND phone = %s"""
-            cursor.execute(sql, (thid, mobile))
-            user = cursor.fetchone()
-
-            if not user: return json.dumps({"error": "invalid credential"}), 401
-
-            return json.dumps({"message": "valid credential."}), 200
-
+        cursor.execute(query, params)
+        user = cursor.fetchone()
+        if user is None:
+            return None, "User not found"
+        return user, None  # return the user and None for no error
     except Exception as e:
-        return json.dumps({"error": f"an error occurred while verifying passkey by thid and mobile: {str(e)}"}), 500
-    
+        return None, f"Error retrieving user: {str(e)}"
     finally:
-        connection.close()
+        db.close_db()
