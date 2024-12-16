@@ -1,13 +1,15 @@
+import os
 from flask import Flask, jsonify
-# from report import report_bp
-# from admin import admin_bp
 from login import login_bp
 from flask_swagger_ui import get_swaggerui_blueprint
 from flask_cors import CORS
 # from products import products_bp
 
-app = Flask(__name__)
+
+app = Flask(__name__, instance_relative_config=True)
 CORS(app) 
+
+app.config.from_pyfile('config.py', silent=True) # load the instance config
 
 ### swagger specific ###
 SWAGGER_URL = '/swagger'
@@ -23,8 +25,7 @@ app.register_blueprint(SWAGGERUI_BLUEPRINT, url_prefix=SWAGGER_URL)
 ### end swagger specific ###
 
 # Register Blueprints
-# app.register_blueprint(report_bp, url_prefix='/')
-# app.register_blueprint(admin_bp, url_prefix='/')
+
 app.register_blueprint(login_bp, url_prefix='/')
 
 
