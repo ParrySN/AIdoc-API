@@ -1,0 +1,3 @@
+*.pyc
+record/__pycache__/
+.venv/
