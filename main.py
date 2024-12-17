@@ -1,5 +1,5 @@
 import os
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, current_app
 from login import login_bp
 from flask_swagger_ui import get_swaggerui_blueprint
 from flask_cors import CORS
@@ -15,7 +15,15 @@ CORS(app)
 app.config.from_pyfile('config.py', silent=True)  # load the instance config
 
 # Configure JWT token
-app.config["JWT_SECRET_KEY"] = "your-secure-secret-key"  # Set a secret key directly here
+# Load configuration from file
+app.config.from_pyfile('config.py', silent=True)  # load the instance config
+
+# Configure JWT token
+app.config["JWT_SECRET_KEY"] = app.config.get('SECRET_KEY', 'SECRET_KEY')
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
+
+jwt = JWTManager(app)  # Initialize JWTManager
+
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
 jwt = JWTManager(app)  # Initialize JWTManager
 
