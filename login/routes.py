@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
-from .login import verify_user_from_aidoc, verify_user_from_oralcancer
+from .login import verify_user_from_aidoc, verify_user_from_questionnaire
+import jwt
 
 login_bp = Blueprint('login', __name__)
 
@@ -16,7 +17,7 @@ def verify_user():
         return jsonify(result), status
 
     # Check user in oralcancer database
-    result, status = verify_user_from_oralcancer(key)
+    result, status = verify_user_from_questionnaire(key)
     if result:
         return jsonify(result), status
 

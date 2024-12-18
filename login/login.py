@@ -31,81 +31,68 @@ def verify_user_from_aidoc(key):
     return None, 401
 
 
-def verify_user_from_oralcancer(key):
+def verify_user_from_questionnaire(key):
     """Fetch user details from the oralcancer database."""
-    connection = connect_to_oralcancer()
+    connection = connect_to_mysql()
     try:
         with connection.cursor(cursor=pymysql.cursors.DictCursor) as cursor:
-            # Query patients table
+            # does not have work and dob 
             cursor.execute(
-                """SELECT license, fullname, sex, birth_date, province, address, phone, work
-                FROM patients WHERE license = %s""", (key,)
+                """SELECT cid, name, sex, changwat, ampur, tumbon,address , phone
+                FROM oralcancer.questionnaire WHERE cid = %s""", (key,)
             )
             patient = cursor.fetchone()
             if patient:
-                full_name = patient['fullname'].split(' ', 1)
-                return {
-                    "thaid": patient['license'],
-                    "first_name": full_name[0],
-                    "last_name": full_name[1] if len(full_name) > 1 else '',
-                    "gender": patient['sex'],
-                    "dob": patient['birth_date'],
-                    "province": patient['province'],
-                    "address": patient['address'],
-                    "phone": patient['phone'],
-                    "job": patient['work']
-                }, 201
+                first_name, last_name = split_name(patient['name'])
 
-            # Query users table
-            cursor.execute(
-                """SELECT license, name, surname, username, province, phone, work, role, email, hospital 
-                FROM users WHERE username = %s""", (key,)
-            )
-            user = cursor.fetchone()
-            if user:
-                if user['username'] and user['username'].isdigit() and len(user['username']) == 13:
-                    return {
-                        "license": user['license'],
-                        "first_name": user['name'],
-                        "last_name": user['surname'],
-                        "thaid": user['username'],
-                        "province": user['province'],
-                        "mobile": user['phone'],
-                        "job": user['work'],
-                        "role": user['role'],
-                        "email": user['email'],
-                        "hospital": user['hospital'],
-                        "gender": None,
-                        "district": None,
-                        "subdistrict": None,
-                        "address1": None,
-                        "dob": None,
-                    }, 201
+                phone = str(patient.get('phone', ''))
+                if phone.startswith('0'):
+                    phone = None
                 else:
+                    phone = '0' + phone
+
+                if patient['cid'] == patient['name']:
                     return {
-                        "license": user['license'],
-                        "first_name": user['name'],
-                        "last_name": user['surname'],
-                        "username": user['username'],
-                        "province": user['province'],
-                        "mobile": user['phone'],
-                        "career": user['work'],
-                        "role": user['role'],
-                        "email": user['email'],
-                        "hospital": user['hospital'],
-                        "gender": None,
-                        "district": None,
-                        "subdistrict": None,
-                        "address1": None,
-                        "thaid": None,
+                        "thaid": patient['cid'],
+                        "first_name": None,
+                        "last_name": None,
+                        "gender": patient['sex'],
                         "dob": None,
+                        "province": patient['changwat'],
+                        "district": patient['ampur'],
+                        "subdistrict": patient['tumbon'],
+                        "address": patient['address'],
+                        "mobile": phone,
+                        "career": None
                     }, 201
+
+                return {
+                    "thaid": patient['cid'],
+                    "first_name": first_name,
+                    "last_name": last_name,
+                    "gender": patient['sex'],
+                    "dob": None,
+                    "province": patient['changwat'],
+                    "district": patient['ampur'],
+                    "subdistrict": patient['tumbon'],
+                    "address": patient['address'],
+                    "mobile": phone,
+                    "career": None
+                }, 201
+            
     except Exception as e:
         return {"message": str(e)}, 500
     finally:
         connection.close()
-    return {"message": "user not found"}, 401
+    return {"message": "User not found"}, 401
 
+
+def split_name(name):
+    """Split the name into first and last names."""
+    full_name = name.split(' ', 1) if name else ['']
+    first_name = full_name[0].strip().rstrip('.')
+    last_name = full_name[1].strip() if len(full_name) > 1 else ''  # Remove spaces
+    return first_name, last_name
 
 def check_role(user):
     """Assign roles to a user based on flags."""
