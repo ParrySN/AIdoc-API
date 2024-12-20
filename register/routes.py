@@ -19,3 +19,10 @@ def post_register_patient():
     output = register.post_register_patient(data)
 
     return output
+
+@register_bp.route("/register/patient/oralcancer/", methods=['GET'])
+def get_patient():
+    id = request.args.get('id')
+    return register.get_oralcancer_patient(id)
+    
+    

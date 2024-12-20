@@ -1,0 +1,43 @@
+openapi: 3.0.3
+info:
+  title: SWAGGER AIDOC
+  version: 1.0.0
+
+servers:
+  - url: http://127.0.0.1:5000
+paths:
+  /register/patient/oralcancer:
+    get:
+      summary: Get patient oral cancer data
+      parameters:
+        - name: id
+          in: query
+          description: Patient ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        fullname:
+                          type: string
+                        work:
+                          type: string
+                        license:
+                          type: string
+                        province:
+                          type: string
+        '400':
+          description: Missing or invalid parameters

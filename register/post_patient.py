@@ -1,4 +1,4 @@
-from ... import db
+import db
 from flask import json
 
 def post_patient(data):
@@ -13,7 +13,10 @@ def post_patient(data):
             }
     except Exception as e:
         return json.dumps({"error": "An unexpected error occurred","details":str(e)},500)
-
+    
+    finally:
+        db.close_db()
+        
     return output
 
 
