@@ -8,7 +8,7 @@ def post_register_patient():
 
     required_fields = [
         "name","surname","national_id","birthdate","sex","province"
-            ,"default_location","address","phone","job_position","is_patient"
+            ,"default_location","address","phone","job_position"
     ]
 
     for field in required_fields:

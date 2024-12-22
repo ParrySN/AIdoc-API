@@ -41,3 +41,59 @@ paths:
                           type: string
         '400':
           description: Missing or invalid parameters
+  /register/patient:
+    post:
+      summary: Register a new patient
+      requestBody:
+        description: Patient data to be registered
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                surname:
+                  type: string
+                national_id:
+                  type: string
+                birthdate:
+                  type: string
+                  format: date
+                sex:
+                  type: string
+                  enum: [M,F]
+                province:
+                  type: string
+                default_location:
+                  type: string
+                address:
+                  type: string
+                phone:
+                  type: string
+                job_position:
+                  type: string
+      responses:
+        '200':
+          description: Patient registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  patient_data:
+                    type: object
+        '500':
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  details:
+                    type: string
