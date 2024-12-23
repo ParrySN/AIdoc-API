@@ -7,7 +7,7 @@ from flask_cors import CORS
 
 
 app = Flask(__name__, instance_relative_config=True)
-CORS(app) 
+CORS(app)
 
 app.config.from_pyfile('config.py', silent=True) # load the instance config
 
