@@ -1,12 +1,12 @@
 from flask import jsonify
-from db import connect_to_mysql, connect_to_oralcancer
+import db
 import pymysql
 
 def verify_user_from_aidoc(key):
     """Fetch user details from the aidoc_development database."""
-    connection = connect_to_mysql()
+    connection,cursor = db.get_db()
     try:
-        with connection.cursor(cursor=pymysql.cursors.DictCursor) as cursor:
+        with cursor:
             cursor.execute(
                 "SELECT national_id, username, is_patient, is_osm, is_specialist, is_admin "
                 "FROM user WHERE national_id = %s OR username = %s", (key, key)
@@ -27,16 +27,16 @@ def verify_user_from_aidoc(key):
     except Exception as e:
         return {"message": str(e)}, 500
     finally:
-        connection.close()
+        db.close_db()
+
     return None, 401
 
 
 def verify_user_from_questionnaire(key):
     """Fetch user details from the oralcancer database."""
-    connection = connect_to_mysql()
+    connection,cursor = db.get_db_2()
     try:
-        with connection.cursor(cursor=pymysql.cursors.DictCursor) as cursor:
-            # does not have work and dob 
+        with cursor:
             cursor.execute(
                 """SELECT cid, name, sex, changwat, ampur, tumbon,address , phone
                 FROM oralcancer.questionnaire WHERE cid = %s""", (key,)
@@ -83,7 +83,7 @@ def verify_user_from_questionnaire(key):
     except Exception as e:
         return {"message": str(e)}, 500
     finally:
-        connection.close()
+        db.close_db()
     return {"message": "User not found"}, 401
 
 

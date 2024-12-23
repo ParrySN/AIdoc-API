@@ -15,6 +15,18 @@ def get_db():
     
     return (g.db, g.db.cursor(dictionary=True))
 
+# def get_db_2():
+#     if 'db' not in g:
+#         g.db = mysql.connector.connect(
+#             host=current_app.config['DB_HOST_2'],
+#             database=current_app.config['DB_DATABASE_2'],
+#             user=current_app.config['DB_USER'],
+#             password=current_app.config['DB_PASSWORD']
+#         )
+#         g.db.autocommit = True
+    
+#     return (g.db, g.db.cursor(dictionary=True))
+
 def close_db(e=None):
     db = g.pop('db', None)
 
