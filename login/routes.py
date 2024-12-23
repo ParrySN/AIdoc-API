@@ -16,9 +16,9 @@ def verify_user():
     if result:
         return jsonify(result), status
 
-    # # Check user in oralcancer database
-    # result, status = verify_user_from_questionnaire(key)
-    # if result:
-    #     return jsonify(result), status
+    # Check user in oralcancer database
+    result, status = verify_user_from_questionnaire(key)
+    if result:
+        return jsonify(result), status
 
     return jsonify({"message": "user not found"}), 401
