@@ -1,4 +1,11 @@
+# Ignore _pycache_ directories
+_pycache_/
+
+# Ignore Python bytecode files (if necessary)
 *.pyc
-__pycache__/
-.venv/
-venv/
+
+instance/*
+aidoc/__pycache__/*
+oralLesionNet/*
+imageData/*
+imageQualityChecker/imageQualityChecker.tflite
