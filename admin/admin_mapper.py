@@ -6,25 +6,25 @@ def map_user_list_data(data):
 
     for row in data:
         user = {
-            "id": row[0],
-            "name": row[1],
-            "surname": row[2],
-            "email": row[8] if row[8] else "None",
-            "province": row[9],
-            "job_position": cm.map_job_position_to_th(row[3]),
+            "id": row["id"],
+            "name": row["name"],
+            "surname": row["surname"],
+            "email": row["email"] if row["email"] else "None",
+            "province": row["province"],
+            "job_position": cm.map_job_position_to_th(row["job_position"]),
             "role": [],
-            "total_submit": row[10]
+            "total_submit": row["N"]
         }
 
-        if row[4] == 1:
+        if row["is_patient"] == 1:
             user["role"].append("patient")
-        if row[5] == 1:
+        if row["is_osm"] == 1:
             user["role"].append("osm")
-        if row[6] == 1:
+        if row["is_specialist"] == 1:
             user["role"].append("specialist")
-        if row[7] == 1:
+        if row["is_admin"] == 1:
             user["role"].append("admin")
-        
+
         user_list.append(user)
 
     return user_list
@@ -32,36 +32,36 @@ def map_user_list_data(data):
 def map_image_manage_list_data(data):
     image_manage_list = []
     for row in data:
-        image= {
-            "submission_id": row[0],
-            "file_name": row[1],
-            "submission_date": du.format_date_to_ddMMyyyy_time(row[2]),
-            "ai_prediction": cm.map_ai_prediction_int(row[3]).upper(),
-            "sender_fullname": f"{row[4]} {row[5]}",
-            "sender_name": row[4],
-            "sender_surname": row[5],
-            "is_special_req": row[6],
-            "province": row[7],
-            "dentist_fullname": f"{row[11]} {row[12]}",
-            "dentist_name": row[11],
-            "dentist_surname": row[12],
-            "dentist_comment": row[9],
-            "national_id": row[10],
-            "sender_job": cm.map_job_position_to_th(row[13]),
-            "sender_id": row[14]
+        image = {
+            "submission_id": row['id'],
+            "file_name": row['fname'],
+            "submission_date": du.format_date_to_ddMMyyyy_time(row['created_at']),
+            "ai_prediction": cm.map_ai_prediction_int(row['ai_prediction']).upper(),
+            "sender_fullname": f"{row['user_name']} {row['user_surname']}",
+            "sender_name": row['user_name'],
+            "sender_surname": row['user_surname'],
+            "is_special_req": row['special_request'],
+            "province": row['location_province'],
+            "dentist_fullname": f"{row['dentist_name']} {row['dentist_surname']}" if row['dentist_name'] and row['dentist_surname'] else "",
+            "dentist_name": row['dentist_name'],
+            "dentist_surname": row['dentist_surname'],
+            "dentist_comment": row['dentist_feedback_comment'],
+            "national_id": row['national_id'],
+            "sender_job": cm.map_job_position_to_th(row['job_position']),
+            "sender_id": row['sender_id']
         }
-
         image_manage_list.append(image)
 
     return image_manage_list
+
 
 def map_dentist_send_list_data(data):
     dentist_send_list = []
     for row in data:
         dentist= {
-            "dentist_fullname" : f"{row[0]} {row[1]}",
-            "dentist_license": row[2],
-            "dentist_id": row[3],
+            "dentist_fullname" : f"{row['name']} {row['surname']}",
+            "dentist_license": row['license'],
+            "dentist_id": row['id'],
         }
 
         dentist_send_list.append(dentist)

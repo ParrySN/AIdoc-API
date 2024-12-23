@@ -6,17 +6,14 @@ from admin.admin_mapper import map_dentist_send_list_data, map_image_manage_list
 
 
 def image_manage_list(data):
-    if data['limit'] <= 0 or data['page'] <= 0:
-        return json.dumps({"error": "Invalid 'limit' or 'page' values."}), 400
-
-    offset = (data['page'] - 1) * data['limit']
-
-    connection = db.connect_to_mysql()
-    if not connection:
-        return json.dumps({"error": "Failed to connect to the database."}), 500
-
+    connection, cursor = db.get_db()
     try:
-        with connection.cursor() as cursor:
+        with cursor:
+            if data['limit'] <= 0 or data['page'] <= 0:
+                return json.dumps({"error": "Invalid 'limit' or 'page' values."}), 400
+
+            offset = (data['page'] - 1) * data['limit']
+
             image_manage_list_query = fetch_image_manage_list(cursor, data['limit'], offset, data)
             image_manage_list = map_image_manage_list_data(image_manage_list_query)
 
@@ -42,7 +39,7 @@ def image_manage_list(data):
     except Exception as e:
         return json.dumps({"error": f"An error occurred while fetching image records: {e}"}), 500
     finally:
-        connection.close()
+        db.close_db()
 
     return output
 
@@ -76,7 +73,7 @@ def fetch_image_manage_list(cursor, limit, offset, data):
 
 def fetch_total_count(cursor, data):
     query = """
-        SELECT COUNT(*) 
+        SELECT COUNT(*) as N
         FROM submission_record sr
         LEFT JOIN user u1 ON sr.sender_id = u1.id
         LEFT JOIN user u2 ON sr.dentist_id = u2.id
@@ -89,7 +86,8 @@ def fetch_total_count(cursor, data):
         query += " WHERE " + " AND ".join(conditions)
 
     cursor.execute(query, tuple(params))
-    return cursor.fetchone()[0]
+    total_count = cursor.fetchone()
+    return total_count['N']
 
 
 def build_conditions(data):
@@ -174,9 +172,10 @@ def fetch_province_send_dropdown_list(cursor):
     """
     cursor.execute(query)
     province_send_dropdown_list = cursor.fetchall()
-    province_send_dropdown_list = [province[0] for province in province_send_dropdown_list]
-    
-    return province_send_dropdown_list
+
+    province_list = [row['location_province'] for row in province_send_dropdown_list]
+
+    return province_list
 
 
 def fetch_dentist_send_dropdown_list(cursor):
@@ -193,5 +192,5 @@ def fetch_dentist_send_dropdown_list(cursor):
     """
     cursor.execute(query)
     dentist_send_dropdown_list = map_dentist_send_list_data(cursor.fetchall())
-
+    
     return dentist_send_dropdown_list

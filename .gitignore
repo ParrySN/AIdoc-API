@@ -9,3 +9,15 @@ aidoc/__pycache__/*
 oralLesionNet/*
 imageData/*
 imageQualityChecker/imageQualityChecker.tflite
+
+instance/*
+aidoc/__pycache__/*
+oralLesionNet/*
+imageData/*
+imageQualityChecker/imageQualityChecker.tflite
+
+instance/*
+aidoc/__pycache__/*
+oralLesionNet/*
+imageData/*
+imageQualityChecker/imageQualityChecker.tflite

@@ -4,45 +4,31 @@ import db
 import common.common_mapper as cm
 
 def user_info(id):
-    connection = db.connect_to_mysql()
-    if not connection:
-        return json.dumps({"error": "Failed to connect to the database."}), 500
-    
+    connection, cursor = db.get_db()
     try:
-        with connection.cursor() as cursor:
+        with cursor:
             user_info_query = fetch_user_info(cursor,id)
 
             if not user_info_query:
                 return json.dumps({"error": "User not found."}), 400
-
+            
             user_data = {
-                "id": user_info_query[0],
-                "name": user_info_query[1],
-                "surname": user_info_query[2],
-                "job_position": user_info_query[3],
-                "job_position_display": cm.map_job_position_to_th(user_info_query[3]),
-                "is_patient": user_info_query[4],
-                "is_osm": user_info_query[5],
-                "is_specialist": user_info_query[6],
-                "is_admin": user_info_query[7],
-                "email": user_info_query[8],
-                "province": user_info_query[9],
-                "national_id": user_info_query[10],
-                "hospital": user_info_query[11],
-                "phone": user_info_query[12],
-                "license": user_info_query[13]
+                **user_info_query,
+                "job_position_th": cm.map_job_position_to_th(user_info_query['job_position'])
             }
+
+
+            output = user_data
 
     except Exception as e:
         return  json.dumps({"error": f"An error occurred while fetching user data: {e}"}), 500
     
     finally:
-        connection.close()
+        db.close_db()
 
-    return jsonify(user_data)
+    return output
 
 def fetch_user_info(cursor,id):
-    print(id)
     query ="""
         SELECT
             id,

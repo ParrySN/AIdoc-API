@@ -3,17 +3,12 @@ from flask import json, jsonify
 import db
 
 def update_user_info(data):
-    connection = db.connect_to_mysql()
-    if not connection:
-        return json.dumps({"error": "Failed to connect to the database."}), 500
-    
+    connection, cursor = db.get_db()
     try:
-        with connection.cursor() as cursor:
+        with cursor:
             update_table_user(cursor,data)
-            connection.commit()
 
             update_table_submission_record_national_id(cursor,data)
-            connection.commit()
             
             output = {
                 "message": "User information updated successfully.",
@@ -23,7 +18,7 @@ def update_user_info(data):
         return json.dumps({"error": f"An error occurred while fetching user data: {e}"}), 500
     
     finally:
-        connection.close()
+        db.close_db()
 
     return output
 
