@@ -15,10 +15,12 @@ def verify_user_from_aidoc(key):
             if user:
                 check_role(user)
                 if user['national_id'] == key:
-                    return {
-                        "thaid": user['national_id'],
-                        "roles": user['role'].split(',')
-                    }, 200
+                    if user['is_patient'] == 1 & user['is_osm']!= 1 & user['is_specialist'] != 1 & user['is_admin'] != 1:
+                        return {
+                            #generate token
+                            "thaid": user['national_id'],
+                            "roles": user['role'].split(',')
+                        }, 200
                 elif user['username'] == key:
                     return {
                         "username": user['username'],
@@ -26,8 +28,6 @@ def verify_user_from_aidoc(key):
                     }, 200
     except Exception as e:
         return {"message": str(e)}, 500
-    finally:
-        db.close_db()
 
     return None, 401
 
@@ -82,8 +82,7 @@ def verify_user_from_questionnaire(key):
             
     except Exception as e:
         return {"message": str(e)}, 500
-    finally:
-        db.close_db()
+
     return {"message": "User not found"}, 401
 
 
