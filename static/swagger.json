@@ -322,7 +322,7 @@ paths:
   /verify/user:
     get:
       tags:
-        - Login
+        - login
       summary: Verify user by key
       description: This endpoint verifies a user by their `thid` or `username` in the `aidoc_development` database or by their `thid` in the `oralcancer` database.
       parameters:
@@ -413,3 +413,118 @@ paths:
                   message:
                     type: string
                     example: "user not found"
+  /get_user:
+    get:
+      tags:
+        - login
+      summary: Hash the user password
+      description: This endpoint hashes the provided password using a secure hashing algorithm and returns the hashed password.
+      parameters:
+        - name: password
+          in: query
+          required: true
+          schema:
+            type: string
+            example: P@ssword
+          description: Password to be hashed.
+      responses:
+        "200":
+          description: Password hashed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  hashed_password:
+                    type: string
+      security:
+        - BearerAuth: []  # Add security definition for this route
+  /logout:
+    post:
+      tags:
+        - login
+      summary: Logout the user
+      description: This endpoint logs out the user by invalidating the current JWT token.
+      responses:
+        "200":
+          description: Successfully logged out
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: Successfully logged out
+      security:
+        - BearerAuth: []  # Apply JWT security for this route
+  /verify/passkey/:
+      get:
+        tags:
+          - login
+        summary: Verify user credentials
+        description: Verifies a user by username/password or by thid/mobile using query parameters.
+        parameters:
+          - name: username
+            in: query
+            required: false
+            schema:
+              type: string
+              example: adminbest
+            description: Username of the user.
+          - name: password
+            in: query
+            required: false
+            schema:
+              type: string
+              example: 12345678
+            description: Password of the user.
+          - name: thid
+            in: query
+            required: false
+            schema:
+              type: string
+            description: Thai ID of the user.
+          - name: mobile
+            in: query
+            required: false
+            schema:
+              type: string
+            description: Mobile number of the user.
+        responses:
+          "200":
+            description: User verified successfully
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      example: valid credential.
+          "400":
+            description: Bad request due to missing or invalid input
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    error:
+                      type: string
+                      example: Invalid request format. Provide either username/password or thid/mobile.
+          "401":
+            description: Unauthorized due to invalid credentials
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    error:
+                      type: string
+                      example: invalid username/password or thid/mobile.
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT  

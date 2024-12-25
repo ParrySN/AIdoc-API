@@ -1,31 +1,45 @@
 from flask import jsonify
+from flask_jwt_extended import create_access_token
+from common.common_mapper import map_role_to_list
 import db
 import pymysql
 
 def verify_user_from_aidoc(key):
-    """Fetch user details from the aidoc_development database."""
     connection,cursor = db.get_db()
     try:
         with cursor:
-            cursor.execute(
-                "SELECT national_id, username, is_patient, is_osm, is_specialist, is_admin "
-                "FROM user WHERE national_id = %s OR username = %s", (key, key)
-            )
+            query ="""
+            SELECT 
+                *
+                FROM user 
+                WHERE national_id = %s 
+                OR username = %s
+            """
+            cursor.execute(query, (key, key))
             user = cursor.fetchone()
             if user:
-                check_role(user)
-                if user['national_id'] == key:
-                    if user['is_patient'] == 1 & user['is_osm']!= 1 & user['is_specialist'] != 1 & user['is_admin'] != 1:
-                        return {
-                            #generate token
-                            "thaid": user['national_id'],
-                            "roles": user['role'].split(',')
-                        }, 200
-                elif user['username'] == key:
+                role = map_role_to_list(user)
+                if user['username'] == key:
                     return {
+                        "channel": "dentist/admin",
                         "username": user['username'],
-                        "roles": user['role'].split(',')
+                        "roles": role
                     }, 200
+                elif user['national_id'] == key:
+                    if user['is_patient'] == 1 and user['is_osm'] == 0 and user['is_specialist'] == 0 and user['is_admin'] == 0:
+                        access_token = create_access_token(identity=str(role), additional_claims=user)
+                        return {
+                            "channel": "patient",
+                            "thaid": user['national_id'],
+                            "roles": role,
+                            "access_token": access_token
+                        }, 200
+                    else:
+                        return {
+                            "channel": "osm",
+                            "thaid": user['national_id'],
+                            "roles": role
+                        }, 200 
     except Exception as e:
         return {"message": str(e)}, 500
 
@@ -33,14 +47,22 @@ def verify_user_from_aidoc(key):
 
 
 def verify_user_from_questionnaire(key):
-    """Fetch user details from the oralcancer database."""
     connection,cursor = db.get_db_2()
     try:
         with cursor:
-            cursor.execute(
-                """SELECT cid, name, sex, changwat, ampur, tumbon,address , phone
-                FROM oralcancer.questionnaire WHERE cid = %s""", (key,)
-            )
+            query ="""
+                SELECT 
+                cid, 
+                name, 
+                sex, 
+                changwat, 
+                ampur, 
+                tumbon,
+                address , 
+                phone
+                FROM oralcancer.questionnaire 
+                WHERE cid = %s"""
+            cursor.execute(query, (key,))
             patient = cursor.fetchone()
             if patient:
                 first_name, last_name = split_name(patient['name'])
@@ -57,7 +79,7 @@ def verify_user_from_questionnaire(key):
                         "first_name": None,
                         "last_name": None,
                         "gender": patient['sex'],
-                        "dob": None,
+                        "job": None,
                         "province": patient['changwat'],
                         "district": patient['ampur'],
                         "subdistrict": patient['tumbon'],
@@ -71,7 +93,7 @@ def verify_user_from_questionnaire(key):
                     "first_name": first_name,
                     "last_name": last_name,
                     "gender": patient['sex'],
-                    "dob": None,
+                    "job": None,
                     "province": patient['changwat'],
                     "district": patient['ampur'],
                     "subdistrict": patient['tumbon'],
@@ -87,21 +109,8 @@ def verify_user_from_questionnaire(key):
 
 
 def split_name(name):
-    """Split the name into first and last names."""
     full_name = name.split(' ', 1) if name else ['']
     first_name = full_name[0].strip().rstrip('.')
-    last_name = full_name[1].strip() if len(full_name) > 1 else ''  # Remove spaces
+    last_name = full_name[1].strip() if len(full_name) > 1 else '' 
     return first_name, last_name
 
-def check_role(user):
-    """Assign roles to a user based on flags."""
-    roles = []
-    if user.get('is_patient'):
-        roles.append('patient')
-    if user.get('is_osm'):
-        roles.append('osm')
-    if user.get('is_specialist'):
-        roles.append('specialist')
-    if user.get('is_admin'):
-        roles.append('admin')
-    user['role'] = ','.join(roles)
