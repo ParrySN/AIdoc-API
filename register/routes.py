@@ -8,7 +8,7 @@ def post_register_patient():
 
     required_fields = [
         "name","surname","national_id","birthdate","sex","province"
-            ,"default_location","address","phone","job_position"
+            ,"district","subdistrict","address","phone","job_position","zipcode"
     ]
 
     for field in required_fields:
@@ -16,13 +16,31 @@ def post_register_patient():
             return jsonify({"error": f"Missing required field: {field}"}), 400
 
 
-    output = register.post_register_patient(data)
+    output = register.register_patient(data)
+
+    return output
+
+@register_bp.route("/register/doctor/", methods=["POST"])
+def post_register_doctor():
+    data = request.get_json()
+
+    required_fields = [
+        "name","surname","job_position","hospital","province","phone"
+            ,"email","username","password"
+    ]
+
+    for field in required_fields:
+        if field not in data:
+            return jsonify({"error": f"Missing required field: {field}"}), 400
+
+
+    output = register.register_doctor(data)
 
     return output
 
 @register_bp.route("/register/patient/oralcancer/", methods=['GET'])
 def get_patient():
     id = request.args.get('id')
-    return register.get_oralcancer_patient(id)
-    
+    return register.oralcancer_patient(id)
+
     

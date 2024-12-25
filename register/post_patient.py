@@ -3,52 +3,37 @@ from flask import json
 from . import get_patient_oralcancer
 
 def post_patient(data):
+    connection, cursor = db.get_db()
     try:
-        # Connect to the first database
-        connection, cursor = db.get_db2()
-        oralcancer_patient = get_patient_oralcancer.get_data_oralcancer(data["national_id"])
-        db.close_db()
-        connection, cursor = db.get_db()
-        # Check for patient information
-        if not oralcancer_patient["patient_info"]:
-            post_table_user(cursor,data)
-            message = "successfully register"
-            output = {
-            "message": message,
-            "patient_info": data
-            }
-        else:
-            patient_info = oralcancer_patient["patient_info"]
-            first_name, last_name = patient_info[0]["fullname"].split(maxsplit=1)
+        if check_national_id_exists(cursor, data["national_id"]):
+            return json.dumps({
+                "error": "Patient with this National ID already exists"
+            }), 400
+        data["default_location"] = {
+            'province': data.get("province", ""),
+            'district': data.get("district", ""),
+            'subdistrict': data.get("subdistrict", ""),
+            'zipcode': data.get("zipcode", ""),
+        }
+        post_table_user(cursor, data)
+        output = {
+            "message": "Post successfully",
+            "patient_data": data
+        }
 
-            renamed_fields_info = {
-                "name": first_name,
-                "surname": last_name,
-                "national_id": patient_info[0]["license"],
-                "birthdate": patient_info[0]["birth_date"],
-                "sex": patient_info[0]["sex"],
-                "province": patient_info[0]["province"],
-                "default_location": "none",
-                "address": patient_info[0]["address"],
-                "phone": patient_info[0]["phone"],
-                "job_position": patient_info[0]["work"],
-            }
-            post_table_user(cursor,renamed_fields_info)
-            message = "Adding old user to new database successfully"
-            output = {
-            "message": message,
-            "patient_info": renamed_fields_info
-            }
-            
-        db.close_db()
     except Exception as e:
         return json.dumps({
             "error": "An unexpected error occurred",
             "details": str(e)
         }), 500
 
-    return json.dumps(output, ensure_ascii=False), 200
+    return output
 
+
+def check_national_id_exists(cursor, national_id):
+    sql = "SELECT 1 FROM user WHERE national_id = %s"
+    cursor.execute(sql, (national_id,))
+    return cursor.fetchone() is not None
 
 def post_table_user(cursor, data):
     sql = """
@@ -58,6 +43,7 @@ def post_table_user(cursor, data):
         )
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """
+    default_location_json = json.dumps(data["default_location"])
     cursor.execute(sql, (
         data["name"],
         data["surname"],
@@ -65,9 +51,9 @@ def post_table_user(cursor, data):
         data["birthdate"],
         data["sex"],
         data["province"],
-        data["default_location"],
+        default_location_json,
         data["address"],
         data["phone"],
         data["job_position"],
-        True  # Indicating this is a patient
+        True
     ))

@@ -66,7 +66,11 @@ paths:
                   enum: [M,F]
                 province:
                   type: string
-                default_location:
+                district:
+                  type: string
+                subdistrict:
+                  type: string
+                zipcode:
                   type: string
                 address:
                   type: string
@@ -97,3 +101,87 @@ paths:
                     type: string
                   details:
                     type: string
+  /register/doctor:
+    post:
+      summary: Register a new doctor
+      requestBody:
+        description: Doctor data to be registered
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                surname:
+                  type: string
+                email:
+                  type: string
+                phone:
+                  type: string
+                sex:
+                  type: string
+                  enum: [M,F]
+                username:
+                  type: string
+                password:
+                  type: string
+                job_position:
+                  type: string
+                hospital:
+                  type: string
+                province:
+                  type: string
+                address:
+                  type: string
+      responses:
+        '200':
+          description: Doctor registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  doctor_data:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      surname:
+                        type: string
+                      email:
+                        type: string
+                      phone:
+                        type: string
+                      job_position:
+                        type: string
+                      hospital:
+                        type: string
+                      province:
+                        type: string
+                      address:
+                        type: string
+        '400':
+          description: Missing or invalid parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  details:
+                    type: string
+ 
