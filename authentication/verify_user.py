@@ -68,38 +68,22 @@ def verify_user_from_questionnaire(key):
                 first_name, last_name = split_name(patient['name'])
 
                 phone = str(patient.get('phone', ''))
-                if phone.startswith('0'):
-                    phone = None
-                else:
+                if not phone.startswith('0'):
                     phone = '0' + phone
 
                 if patient['cid'] == patient['name']:
-                    return {
-                        "thaid": patient['cid'],
-                        "first_name": None,
-                        "last_name": None,
-                        "gender": patient['sex'],
-                        "job": None,
-                        "province": patient['changwat'],
-                        "district": patient['ampur'],
-                        "subdistrict": patient['tumbon'],
-                        "address": patient['address'],
-                        "mobile": phone,
-                        "career": None
-                    }, 201
+                    first_name, last_name = None, None
 
                 return {
                     "thaid": patient['cid'],
                     "first_name": first_name,
                     "last_name": last_name,
                     "gender": patient['sex'],
-                    "job": None,
                     "province": patient['changwat'],
                     "district": patient['ampur'],
                     "subdistrict": patient['tumbon'],
                     "address": patient['address'],
                     "mobile": phone,
-                    "career": None
                 }, 201
             
     except Exception as e:
