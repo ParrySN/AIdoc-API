@@ -1,5 +1,5 @@
 from flask import jsonify
-from flask_jwt_extended import get_jwt
+from flask_jwt_extended import get_jwt, decode_token
 
 from authentication.verify_passkey import verify_by_thid_mobile, verify_by_username_password
 import db
@@ -32,13 +32,21 @@ def login_with_passkey(username, password, thid, mobile):
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
     return output
 
-def revoke_token():
+def revoke_token(): 
     jti = get_jwt()['jti']
+    user_id = get_jwt()['id']
     connection, cursor = db.get_db()
     try:
         with cursor:
-            query = "INSERT INTO jwt_blocklist (token) VALUES (%s)"
-            cursor.execute(query, (jti,))
+            query = """
+            UPDATE access_token
+            SET is_revoke = TRUE, 
+            update_at = CURRENT_TIMESTAMP
+            WHERE user_id = %s AND jti = %s
+            """
+            cursor.execute(query, (user_id, jti))
+        
+        connection.commit() 
         return jsonify({"msg": "Successfully logged out"}), 200
     except Exception as e:
         return jsonify({"message": str(e)}), 500

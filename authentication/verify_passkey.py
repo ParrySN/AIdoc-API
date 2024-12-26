@@ -1,3 +1,5 @@
+
+from authentication.update_token import update_access_token
 from flask import json,jsonify
 from flask_jwt_extended import create_access_token
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -15,6 +17,7 @@ def verify_by_username_password(username, password):
         
         if check_password_hash(user['password'], password):
             access_token = create_access_token(identity=str(role), additional_claims=user)
+            update_access_token(user['id'], access_token, False)
             return jsonify({"access_token": access_token, "message": "Login successful"}), 200
         else:
             return jsonify({"error": "Invalid password"}), 401
@@ -31,6 +34,7 @@ def verify_by_thid_mobile(thid, mobile):
             return jsonify({"error": "Invalid credentials"}), 401
 
         access_token = create_access_token(identity=str(role), additional_claims=user)
+        update_access_token(user['id'], access_token, False)
         return jsonify({"access_token": access_token, "message": "Login successful"}), 200
     except Exception as e:
         return {"message": str(e)}, 500

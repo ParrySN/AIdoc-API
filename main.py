@@ -30,12 +30,16 @@ def check_if_token_in_blacklist(jwt_header, jwt_payload):
     connection, cursor = db.get_db()
     try:
         with cursor:
-            query = "SELECT token FROM jwt_blocklist WHERE token = %s"
-            cursor.execute(query, (jwt_payload['jti'],))
+            query = "SELECT is_revoke FROM access_token WHERE user_id = %s"
+            cursor.execute(query, (jwt_payload['id'],))
             result = cursor.fetchone()
-            return result is not None
+            if result and result['is_revoke']:
+                return True
+            return False
     except Exception as e:
         print(f"Error checking blocklist: {e}")
+        return True 
+
 
 ### Swagger Configure ###
 SWAGGER_URL = '/swagger'

@@ -1,5 +1,6 @@
+from authentication.update_token import update_access_token
 from flask import jsonify
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, decode_token
 from common.common_mapper import map_role_to_list
 import db
 import pymysql
@@ -28,6 +29,7 @@ def verify_user_from_aidoc(key):
                 elif user['national_id'] == key:
                     if user['is_patient'] == 1 and user['is_osm'] == 0 and user['is_specialist'] == 0 and user['is_admin'] == 0:
                         access_token = create_access_token(identity=str(role), additional_claims=user)
+                        update_access_token(user['id'], access_token, False)
                         return {
                             "channel": "patient",
                             "thaid": user['national_id'],
@@ -98,3 +100,4 @@ def split_name(name):
     last_name = full_name[1].strip() if len(full_name) > 1 else '' 
     return first_name, last_name
 
+    
