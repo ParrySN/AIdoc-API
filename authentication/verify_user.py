@@ -21,6 +21,7 @@ def verify_user_from_aidoc(key):
             if user:
                 role = map_role_to_list(user)
                 if user['username'] == key:
+                    #TODO: add role to the response
                     return {
                         "channel": "DENTIST",
                         "username": user['username'],
@@ -39,8 +40,9 @@ def verify_user_from_aidoc(key):
                             "access_token": access_token
                         }, 200
                     else:
+                        #TODO: both osm and patient w/ access token the let fe choose
                         return {
-                            "channel": "OSM",
+                            "channel": ["OSM","PATIENT"],
                             "thaid": user['national_id'],
                             "roles": role
                         }, 200 
