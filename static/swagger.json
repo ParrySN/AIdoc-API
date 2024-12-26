@@ -12,6 +12,140 @@ tags:
   - name: admin
     description: Admin management 
 paths:
+  - name: login
+    description: Login to the system
+paths:
+  /report:
+    get:
+      tags:
+        - report
+      summary: Get a comprehensive report
+      parameters:
+        - name: province
+          in: query
+          required: false
+          description: Province for which the report is requested (in Thai).
+          schema:
+            type: string
+            example: "เชียงใหม่"
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              example:
+                {
+                  "patient_and_osm": {
+                    "osm": {
+                      "accuracy": "100.00",
+                      "ai_predict": {
+                        "normal": 0,
+                        "opmd": 3,
+                        "oscc": 1
+                      },
+                      "dentist_diagnose": {
+                        "normal": 0,
+                        "not_diagnosed": 0,
+                        "opmd": 3,
+                        "oscc": 1,
+                        "others": 0,
+                        "poor_image": 0
+                      },
+                      "total_pic": 4
+                    },
+                    "patient": {
+                      "accuracy": "50.00",
+                      "ai_predict": {
+                        "normal": 1,
+                        "opmd": 0,
+                        "oscc": 1
+                      },
+                      "dentist_diagnose": {
+                        "normal": 0,
+                        "not_diagnosed": 1,
+                        "opmd": 0,
+                        "oscc": 1,
+                        "others": 0,
+                        "poor_image": 0
+                      },
+                      "total_pic": 2
+                    },
+                    "total": {
+                      "accuracy": "75.00",
+                      "ai_predict": {
+                        "normal": 1,
+                        "opmd": 3,
+                        "oscc": 2
+                      },
+                      "dentist_diagnose": {
+                        "normal": 0,
+                        "not_diagnosed": 1,
+                        "opmd": 3,
+                        "oscc": 2,
+                        "others": 0,
+                        "poor_image": 0
+                      },
+                      "total_pic": 6
+                    }
+                  },
+                  "province": "เชียงใหม่",
+                  "specialist": [
+                    {
+                      "ai_predict": {
+                        "normal": 4,
+                        "opmd": 4,
+                        "oscc": 1
+                      },
+                      "dentist_diagnose": {
+                        "agree": 0,
+                        "disagree": 0
+                      },
+                      "job": "Computer Technical Officer",
+                      "total_pic": 9
+                    },
+                    {
+                      "ai_predict": {
+                        "normal": 1,
+                        "opmd": 4,
+                        "oscc": 2
+                      },
+                      "dentist_diagnose": {
+                        "agree": 3,
+                        "disagree": 1
+                      },
+                      "job": "Oral Pathologist",
+                      "total_pic": 7
+                    },
+                    {
+                      "ai_predict": {
+                        "normal": 5,
+                        "opmd": 8,
+                        "oscc": 3
+                      },
+                      "dentist_diagnose": {
+                        "agree": 3,
+                        "disagree": 1
+                      },
+                      "specialist": "total",
+                      "total_pic": 16
+                    }
+                  ],
+                  "total_pic": {
+                    "ai_predict": {
+                      "normal": 6,
+                      "opmd": 11,
+                      "oscc": 5
+                    },
+                    "total_pic": 22
+                  }
+                }
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              example:
+                status: "error"
+                message: "Invalid request parameters."
   /admin_page:
     get:
       tags:
@@ -184,7 +318,7 @@ paths:
             application/json:
               example:
                 error: "An error occurred while updating user information."
-  /image_manage:
+/image_manage:
     get:
       tags:
         - admin
@@ -434,4 +568,86 @@ paths:
               application/json:
                 example:
                   error: "Failed to connect to the database."
-
+  /record:
+    get:
+      summary: Get Patient Record
+      description: Fetch details of a patient and their associated user information from the database.
+      tags:
+        - Records
+      parameters:
+        - in: query
+          name: key
+          required: true
+          schema:
+            type: string
+          description: The unique key that matches both `patient_id` and `user_id` in the database.
+      responses:
+        200:
+          description: Successfully retrieved the patient record.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  patient_id:
+                    type: string
+                    description: ID of the patient.
+                  sender_id:
+                    type: string
+                    description: ID of the sender.
+                  created_at:
+                    type: string
+                    format: date-time
+                    description: Record creation timestamp.
+                  updated_at:
+                    type: string
+                    format: date-time
+                    description: Record update timestamp.
+                  biopsy_fname:
+                    type: string
+                    description: Name of the biopsy file.
+                  biopsy_comment:
+                    type: string
+                    description: Comments on the biopsy.
+                  submission_id:
+                    type: string
+                    description: Submission record ID.
+                  channel:
+                    type: string
+                    description: Communication channel used.
+                  user_id:
+                    type: string
+                    description: User ID associated with the patient.
+                  user_name:
+                    type: string
+                    description: Name of the user.
+        400:
+          description: Bad request, missing or invalid key.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "key is required"
+        404:
+          description: No record found for the given key.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "record not found"
+        500:
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "An error occurred while processing your request."
