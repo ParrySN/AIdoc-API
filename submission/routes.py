@@ -1,4 +1,5 @@
 from flask import jsonify, request, Blueprint
+from flask_jwt_extended import get_jwt, jwt_required
 import db
 from submission import submission
 
@@ -21,7 +22,8 @@ def create_record():
 
     return submission.generate_record(data,imageList)
 
-@submission_bp.route('/record/get_submission', methods=['GET'])
+@submission_bp.route('/record/get_submission/', methods=['GET'])
+@jwt_required()
 def get_submission():
     limit = request.args.get('limit', default=10, type=int)
     page = request.args.get('page', default=1, type=int)
@@ -43,3 +45,16 @@ def get_submission():
     }
     output = submission.generate_submission_record(data)
     return output
+
+@submission_bp.route('/get_user/', methods=['GET'])
+@jwt_required()
+def hash_password():
+    
+    # Retrieve the entire user data from the JWT claims
+    claims = get_jwt()
+    
+    # The full user data is stored in the claims dictionary
+    user_data = claims 
+    
+    # Return response with current user data and hashed password
+    return jsonify(user_data), 200

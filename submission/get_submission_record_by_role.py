@@ -1,5 +1,7 @@
 import json
 import math
+
+from flask_jwt_extended import get_jwt
 import db
 from submission.submission_mapper import map_dentist_send_list_data, map_submission_record_image
 
@@ -90,6 +92,7 @@ def fetch_total_count(cursor, data):
 
 
 def build_conditions(data):
+    user_role = get_jwt()['sub']
     conditions = []
     params = []
 
@@ -158,7 +161,16 @@ def build_conditions(data):
         dentist_id = set_input(data['dentist_id'])
         conditions.append("sr.dentist_id LIKE %s")
         params.append(dentist_id)
-
+    if "admin" not in user_role:
+        if "patient" in user_role or "osm" in user_role:
+            conditions.append("sr.patient_id = %s OR sr.sender_id = %s")
+            params.append(get_jwt()['id'])
+            params.append(get_jwt()['id'])
+            
+        if "specialist" in user_role:
+            conditions.append("sr.sender_id = %s")
+            params.append(get_jwt()['id'])
+        
     return conditions, params
 
 

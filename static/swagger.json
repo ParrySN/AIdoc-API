@@ -12,6 +12,137 @@ tags:
   - name: admin
     description: Admin management 
 paths:
+  /report:
+    get:
+      tags:
+        - report
+      summary: Get a comprehensive report
+      parameters:
+        - name: province
+          in: query
+          required: false
+          description: Province for which the report is requested (in Thai).
+          schema:
+            type: string
+            example: "เชียงใหม่"
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              example:
+                {
+                  "patient_and_osm": {
+                    "osm": {
+                      "accuracy": "100.00",
+                      "ai_predict": {
+                        "normal": 0,
+                        "opmd": 3,
+                        "oscc": 1
+                      },
+                      "dentist_diagnose": {
+                        "normal": 0,
+                        "not_diagnosed": 0,
+                        "opmd": 3,
+                        "oscc": 1,
+                        "others": 0,
+                        "poor_image": 0
+                      },
+                      "total_pic": 4
+                    },
+                    "patient": {
+                      "accuracy": "50.00",
+                      "ai_predict": {
+                        "normal": 1,
+                        "opmd": 0,
+                        "oscc": 1
+                      },
+                      "dentist_diagnose": {
+                        "normal": 0,
+                        "not_diagnosed": 1,
+                        "opmd": 0,
+                        "oscc": 1,
+                        "others": 0,
+                        "poor_image": 0
+                      },
+                      "total_pic": 2
+                    },
+                    "total": {
+                      "accuracy": "75.00",
+                      "ai_predict": {
+                        "normal": 1,
+                        "opmd": 3,
+                        "oscc": 2
+                      },
+                      "dentist_diagnose": {
+                        "normal": 0,
+                        "not_diagnosed": 1,
+                        "opmd": 3,
+                        "oscc": 2,
+                        "others": 0,
+                        "poor_image": 0
+                      },
+                      "total_pic": 6
+                    }
+                  },
+                  "province": "เชียงใหม่",
+                  "specialist": [
+                    {
+                      "ai_predict": {
+                        "normal": 4,
+                        "opmd": 4,
+                        "oscc": 1
+                      },
+                      "dentist_diagnose": {
+                        "agree": 0,
+                        "disagree": 0
+                      },
+                      "job": "Computer Technical Officer",
+                      "total_pic": 9
+                    },
+                    {
+                      "ai_predict": {
+                        "normal": 1,
+                        "opmd": 4,
+                        "oscc": 2
+                      },
+                      "dentist_diagnose": {
+                        "agree": 3,
+                        "disagree": 1
+                      },
+                      "job": "Oral Pathologist",
+                      "total_pic": 7
+                    },
+                    {
+                      "ai_predict": {
+                        "normal": 5,
+                        "opmd": 8,
+                        "oscc": 3
+                      },
+                      "dentist_diagnose": {
+                        "agree": 3,
+                        "disagree": 1
+                      },
+                      "specialist": "total",
+                      "total_pic": 16
+                    }
+                  ],
+                  "total_pic": {
+                    "ai_predict": {
+                      "normal": 6,
+                      "opmd": 11,
+                      "oscc": 5
+                    },
+                    "total_pic": 22
+                  }
+                }
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              example:
+                status: "error"
+                message: "Invalid request parameters."
   /admin_page:
     get:
       tags:
@@ -184,254 +315,214 @@ paths:
             application/json:
               example:
                 error: "An error occurred while updating user information."
-  /image_manage:
+
+
+  /verify/user:
     get:
       tags:
-        - admin
-      summary: Get list of submission images
+        - login
+      summary: Verify user by key
+      description: This endpoint verifies a user by their `thid` or `username` in the `aidoc_development` database or by their `thid` in the `oralcancer` database.
       parameters:
-        - name: limit
+        - name: key
           in: query
-          description: Number of items per page
-          required: false
-          schema:
-            type: integer
-            default: 10
-        - name: page
-          in: query
-          description: The page number to fetch
-          required: false
-          schema:
-            type: integer
-            default: 1
-        - name: priority
-          in: query
-          description: Priority filter for submission (e.g., high, medium, low)
-          required: false
+          required: true
+          description: The identifier to search for a user. Can be either `thid` or `username`.
           schema:
             type: string
-        - name: dentist_checked
-          in: query
-          description: Indicates if the dentist has reviewed the submission
-          required: false
-          schema:
-            type: boolean
-        - name: province
-          in: query
-          description: Province filter for location
-          required: false
-          schema:
-            type: string
-        - name: dentist_id
-          in: query
-          description: Dentist ID to filter submissions
-          required: false
-          schema:
-            type: integer
-        - name: ai_prediction
-          in: query
-          description: Prediction of ai
-          required: false
-          schema:
-            type: integer
-        - name: search_term
-          in: query
-          description: Term to search for across all fields (e.g., name, location, etc.)
-          required: false
-          schema:
-            type: string
+            example: "1234567890"
       responses:
-        '200':
-          description: Successful operation
+        200:
+          description: User found in the `aidoc_development` database.
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: integer
-                    fname:
+                type: object
+                properties:
+                  thid:
+                    type: string
+                    example: "1234567890"
+                  username:
+                    type: string
+                    example: "johndoe"
+                  role:
+                    type: array
+                    items:
                       type: string
-                    created_at:
-                      type: string
-                      format: date-time
-                    ai_prediction:
-                      type: string
-                    user_name:
-                      type: string
-                    user_surname:
-                      type: string
-                    special_request:
-                      type: string
-                    location_province:
-                      type: string
-                    dentist_id:
-                      type: integer
-                    dentist_feedback_comment:
-                      type: string
-                    national_id:
-                      type: string
-                    dentist_name:
-                      type: string
-                    dentist_surname:
-                      type: string
-              example:
-                - id: 1
-                  fname: "Image 1"
-                  created_at: "2024-12-08T10:00:00Z"
-                  ai_prediction: "Healthy"
-                  user_name: "John"
-                  user_surname: "Doe"
-                  special_request: "No"
-                  location_province: "Ontario"
-                  dentist_id: 123
-                  dentist_feedback_comment: "Good image"
-                  national_id: "123456789"
-                  dentist_name: "Dr. Smith"
-                  dentist_surname: "Williams"
-                - id: 2
-                  fname: "Image 2"
-                  created_at: "2024-12-08T10:05:00Z"
-                  ai_prediction: "Cavity detected"
-                  user_name: "Jane"
-                  user_surname: "Smith"
-                  special_request: "Yes"
-                  location_province: "Quebec"
-                  dentist_id: 456
-                  dentist_feedback_comment: "Follow-up needed"
-                  national_id: "987654321"
-                  dentist_name: "Dr. Johnson"
-                  dentist_surname: "Brown"
-  /report:
+                    example: ["admin", "editor"]
+        201:
+          description: User found in the `oralcancer` database.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  thid:
+                    type: string
+                    example: "1234567890"
+                  first_name:
+                    type: string
+                    example: "John"
+                  last_name:
+                    type: string
+                    example: "Doe"
+                  gender:
+                    type: string
+                    example: "Male"
+                  dob:
+                    type: string
+                    format: date
+                    example: "1985-06-15"
+                  province:
+                    type: string
+                    example: "Bangkok"
+                  district:
+                    type: string
+                    example: "Chatuchak"
+                  subdistrict:
+                    type: string
+                    example: "Lat Yao"
+                  address1:
+                    type: string
+                    example: "123 Main Street"
+                  mobile:
+                    type: string
+                    example: "+66812345678"
+                  career:
+                    type: string
+                    example: "Teacher"
+        400:
+          description: Missing required `key` parameter.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "key is required"
+        401:
+          description: User not found in either database.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "user not found"
+  /get_user:
+    get:
+      tags:
+        - login
+      summary: Hash the user password
+      description: This endpoint hashes the provided password using a secure hashing algorithm and returns the hashed password.
+      parameters:
+        - name: password
+          in: query
+          required: true
+          schema:
+            type: string
+            example: P@ssword
+          description: Password to be hashed.
+      responses:
+        "200":
+          description: Password hashed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  hashed_password:
+                    type: string
+      security:
+        - BearerAuth: []  # Add security definition for this route
+  /logout:
+    post:
+      tags:
+        - login
+      summary: Logout the user
+      description: This endpoint logs out the user by invalidating the current JWT token.
+      responses:
+        "200":
+          description: Successfully logged out
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: Successfully logged out
+      security:
+        - BearerAuth: []  # Apply JWT security for this route
+  /verify/passkey/:
       get:
         tags:
-          - report
-        summary: Get a comprehensive report
+          - login
+        summary: Verify user credentials
+        description: Verifies a user by username/password or by thid/mobile using query parameters.
         parameters:
-          - name: province
+          - name: username
             in: query
             required: false
-            description: Province for which the report is requested (in Thai).
             schema:
               type: string
-              example: "เชียงใหม่"
+              example: adminbest
+            description: Username of the user.
+          - name: password
+            in: query
+            required: false
+            schema:
+              type: string
+              example: 12345678
+            description: Password of the user.
+          - name: thid
+            in: query
+            required: false
+            schema:
+              type: string
+            description: Thai ID of the user.
+          - name: mobile
+            in: query
+            required: false
+            schema:
+              type: string
+            description: Mobile number of the user.
         responses:
-          '200':
-            description: Successful operation
+          "200":
+            description: User verified successfully
             content:
               application/json:
-                example:
-                  {
-                    "patient_and_osm": {
-                      "osm": {
-                        "accuracy": "100.00",
-                        "ai_predict": {
-                          "normal": 0,
-                          "opmd": 3,
-                          "oscc": 1
-                        },
-                        "dentist_diagnose": {
-                          "normal": 0,
-                          "not_diagnosed": 0,
-                          "opmd": 3,
-                          "oscc": 1,
-                          "others": 0,
-                          "poor_image": 0
-                        },
-                        "total_pic": 4
-                      },
-                      "patient": {
-                        "accuracy": "50.00",
-                        "ai_predict": {
-                          "normal": 1,
-                          "opmd": 0,
-                          "oscc": 1
-                        },
-                        "dentist_diagnose": {
-                          "normal": 0,
-                          "not_diagnosed": 1,
-                          "opmd": 0,
-                          "oscc": 1,
-                          "others": 0,
-                          "poor_image": 0
-                        },
-                        "total_pic": 2
-                      },
-                      "total": {
-                        "accuracy": "75.00",
-                        "ai_predict": {
-                          "normal": 1,
-                          "opmd": 3,
-                          "oscc": 2
-                        },
-                        "dentist_diagnose": {
-                          "normal": 0,
-                          "not_diagnosed": 1,
-                          "opmd": 3,
-                          "oscc": 2,
-                          "others": 0,
-                          "poor_image": 0
-                        },
-                        "total_pic": 6
-                      }
-                    },
-                    "province": "เชียงใหม่",
-                    "specialist": [
-                      {
-                        "ai_predict": {
-                          "normal": 4,
-                          "opmd": 4,
-                          "oscc": 1
-                        },
-                        "dentist_diagnose": {
-                          "agree": 0,
-                          "disagree": 0
-                        },
-                        "job": "Computer Technical Officer",
-                        "total_pic": 9
-                      },
-                      {
-                        "ai_predict": {
-                          "normal": 1,
-                          "opmd": 4,
-                          "oscc": 2
-                        },
-                        "dentist_diagnose": {
-                          "agree": 3,
-                          "disagree": 1
-                        },
-                        "job": "Oral Pathologist",
-                        "total_pic": 7
-                      },
-                      {
-                        "ai_predict": {
-                          "normal": 5,
-                          "opmd": 8,
-                          "oscc": 3
-                        },
-                        "dentist_diagnose": {
-                          "agree": 3,
-                          "disagree": 1
-                        },
-                        "job": "total",
-                        "total_pic": 16
-                      }
-                    ],
-                    "total_pic": {
-                      "ai_predict": {
-                        "normal": 6,
-                        "opmd": 11,
-                        "oscc": 5
-                      },
-                      "total_pic": 22
-                    }
-                  }
-          '500':
-            description: Failed to connect to the database.
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      example: valid credential.
+          "400":
+            description: Bad request due to missing or invalid input
             content:
               application/json:
-                example:
-                  error: "Failed to connect to the database."
-
+                schema:
+                  type: object
+                  properties:
+                    error:
+                      type: string
+                      example: Invalid request format. Provide either username/password or thid/mobile.
+          "401":
+            description: Unauthorized due to invalid credentials
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    error:
+                      type: string
+                      example: invalid username/password or thid/mobile.
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT  
