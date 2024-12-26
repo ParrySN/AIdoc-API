@@ -9,18 +9,11 @@ def post_patient(data):
             return json.dumps({
                 "error": "Patient with this National ID already exists"
             }), 400
-        data["default_location"] = {
-            'province': data.get("province", ""),
-            'district': data.get("district", ""),
-            'subdistrict': data.get("subdistrict", ""),
-            'zipcode': data.get("zipcode", ""),
-        }
         post_table_user(cursor, data)
         output = {
             "message": "Post successfully",
             "patient_data": data
         }
-
     except Exception as e:
         return json.dumps({
             "error": "An unexpected error occurred",
@@ -43,7 +36,11 @@ def post_table_user(cursor, data):
         )
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """
-    default_location_json = json.dumps(data["default_location"])
+    default_location = json.dumps({
+    "province": data["province"],
+    "district": data["district"],
+    "subdistrict": data["subdistrict"],
+    })
     cursor.execute(sql, (
         data["name"],
         data["surname"],
@@ -51,7 +48,7 @@ def post_table_user(cursor, data):
         data["birthdate"],
         data["sex"],
         data["province"],
-        default_location_json,
+        default_location,
         data["address"],
         data["phone"],
         data["job_position"],

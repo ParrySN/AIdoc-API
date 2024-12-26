@@ -5,17 +5,16 @@ from . import get_patient_oralcancer
 def post_doctor(data):
     connection, cursor = db.get_db()
     try:
-        # Check if the national_id already exists
-        # if check_username_exists(cursor, data["username"]):
-        #     return json.dumps({
-        #         "error": "This username already exist"
-        #     }), 400
+        if check_username_exists(cursor, data["username"]):
+            return json.dumps({
+                "error": "This username already exist"
+            }), 400
 
         post_table_user(cursor, data)
             
         output = {
             "message": "Post successfully",
-            "patient_data": data
+            "doctor_data": data
         }
     except Exception as e:
         return json.dumps({
@@ -26,14 +25,13 @@ def post_doctor(data):
     return output
 
 
-# def check_username_exists(cursor, username):
-#     sql = "SELECT 1 FROM user WHERE username = %s"
-#     cursor.execute(sql, (username,))
-#     return cursor.fetchone() is not None
+def check_username_exists(cursor, username):
+    sql = "SELECT 1 FROM user WHERE username = %s"
+    cursor.execute(sql, (username,))
+    return cursor.fetchone() is not None
 
 
 def post_table_user(cursor, data):
-    print("in")
     sql = """
         INSERT INTO user (
             name, surname, email, phone, sex , username, password,
