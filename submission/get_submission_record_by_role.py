@@ -1,7 +1,7 @@
 import json
 import math
 import db
-from submission.submission_mapper import map_dentist_send_list_data, map_image_manage_list_data
+from submission.submission_mapper import map_dentist_send_list_data, map_submission_record_image
 
 
 def get_submission_record(data):
@@ -13,8 +13,8 @@ def get_submission_record(data):
 
             offset = (data['page'] - 1) * data['limit']
 
-            image_manage_list_query = fetch_image_manage_list(cursor, data['limit'], offset, data)
-            image_manage_list = map_image_manage_list_data(image_manage_list_query)
+            image_manage_list_query = fetch_submission_record(cursor, data['limit'], offset, data)
+            image_manage_list = map_submission_record_image(image_manage_list_query)
 
             total_count = fetch_total_count(cursor, data)
 
@@ -43,7 +43,7 @@ def get_submission_record(data):
     return output
 
 
-def fetch_image_manage_list(cursor, limit, offset, data):
+def fetch_submission_record(cursor, limit, offset, data):
     query = """
         SELECT 
             sr.id, sr.fname, sr.created_at, sr.ai_prediction, 

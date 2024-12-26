@@ -1,6 +1,6 @@
 import common.common_mapper as cm
 import common.date_util as du
-def map_image_manage_list_data(data):
+def map_submission_record_image(data):
     image_manage_list = []
     for row in data:
         image = {
