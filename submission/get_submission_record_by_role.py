@@ -92,7 +92,7 @@ def fetch_total_count(cursor, data):
 
 
 def build_conditions(data):
-    user_role = get_jwt()['sub']
+    user_role = get_jwt()['role']
     conditions = []
     params = []
 

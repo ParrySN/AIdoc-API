@@ -3,7 +3,7 @@ import db
 from flask import jsonify, make_response, request
 from decimal import Decimal
 
-from submission import post_submission_record
+from submission import post_submission
 from submission.get_submission_record_by_role import get_submission_record
 
 def generate_record(data,imageList):

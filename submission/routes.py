@@ -6,6 +6,7 @@ from submission import submission
 submission_bp = Blueprint('submission', __name__)
 
 @submission_bp.route('/record/init', methods=['POST'])
+@jwt_required()
 def create_record():
     data = request.get_json()
     imageList = request.files.getlist("imageList")
