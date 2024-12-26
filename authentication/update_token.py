@@ -19,3 +19,11 @@ def update_access_token(user_id, access_token, is_revoke):
         return {"message": "Access token updated successfully"}, 200
     except Exception as e:
         return {"message": str(e)}, 500
+    
+def generate_additional_claims(channel,role,user):
+    additional_claims = {
+        'channel': channel,
+        'role': role,
+        **user 
+    }
+    return additional_claims

@@ -1,4 +1,4 @@
-from authentication.update_token import update_access_token
+from authentication.update_token import generate_additional_claims, update_access_token
 from flask import jsonify
 from flask_jwt_extended import create_access_token, decode_token
 from common.common_mapper import map_role_to_list
@@ -22,23 +22,25 @@ def verify_user_from_aidoc(key):
                 role = map_role_to_list(user)
                 if user['username'] == key:
                     return {
-                        "channel": "dentist/admin",
+                        "channel": "DENTIST",
                         "username": user['username'],
                         "roles": role
                     }, 200
                 elif user['national_id'] == key:
                     if user['is_patient'] == 1 and user['is_osm'] == 0 and user['is_specialist'] == 0 and user['is_admin'] == 0:
-                        access_token = create_access_token(identity=str(role), additional_claims=user)
+                        channel = "PATIENT"
+                        additional_claims = generate_additional_claims(channel,role,user)
+                        access_token = create_access_token(identity=str(role), additional_claims=additional_claims)
                         update_access_token(user['id'], access_token, False)
                         return {
-                            "channel": "patient",
+                            "channel": channel,
                             "thaid": user['national_id'],
                             "roles": role,
                             "access_token": access_token
                         }, 200
                     else:
                         return {
-                            "channel": "osm",
+                            "channel": "OSM",
                             "thaid": user['national_id'],
                             "roles": role
                         }, 200 

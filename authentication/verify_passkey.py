@@ -1,5 +1,5 @@
 
-from authentication.update_token import update_access_token
+from authentication.update_token import generate_additional_claims, update_access_token
 from flask import json,jsonify
 from flask_jwt_extended import create_access_token
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -16,9 +16,14 @@ def verify_by_username_password(username, password):
             return jsonify({"error": "Invalid username"}), 401
         
         if check_password_hash(user['password'], password):
-            access_token = create_access_token(identity=str(role), additional_claims=user)
+            channel = "DENTIST"
+            additional_claims = generate_additional_claims(channel,role,user)
+            access_token = create_access_token(identity=str(role), additional_claims=additional_claims)
             update_access_token(user['id'], access_token, False)
-            return jsonify({"access_token": access_token, "message": "Login successful"}), 200
+            return jsonify({
+                "channel": channel,
+                "access_token": access_token, 
+                "message": "Login successful"}), 200
         else:
             return jsonify({"error": "Invalid password"}), 401
     except Exception as e:
@@ -33,9 +38,14 @@ def verify_by_thid_mobile(thid, mobile):
         if not user:
             return jsonify({"error": "Invalid credentials"}), 401
 
-        access_token = create_access_token(identity=str(role), additional_claims=user)
+        channel = "OSM"
+        additional_claims = generate_additional_claims(channel,role,user)
+        access_token = create_access_token(identity=str(role), additional_claims=additional_claims)
         update_access_token(user['id'], access_token, False)
-        return jsonify({"access_token": access_token, "message": "Login successful"}), 200
+        return jsonify({
+            "channel": channel,
+            "access_token": access_token, 
+            "message": "Login successful"}), 200
     except Exception as e:
         return {"message": str(e)}, 500
 
