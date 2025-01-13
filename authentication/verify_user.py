@@ -21,7 +21,6 @@ def verify_user_from_aidoc(key):
             if user:
                 role = map_role_to_list(user)
                 if user['username'] == key:
-                    #TODO: add role to the response
                     return {
                         "channel": "DENTIST",
                         "username": user['username'],
@@ -39,12 +38,22 @@ def verify_user_from_aidoc(key):
                             "roles": role,
                             "access_token": access_token
                         }, 200
+                    elif user['is_patient'] == 0 and user['is_osm'] == 1 and user['is_specialist'] == 0 and user['is_admin'] == 0:
+                        channel = "OSM"
+                        return {
+                            "channel": channel,
+                            "thaid": user['national_id'],
+                            "roles": role,
+                        }, 200
                     else:
-                        #TODO: both osm and patient w/ access token the let fe choose
+                        additional_claims = generate_additional_claims("PATIENT",role,user)
+                        access_token = create_access_token(identity=str(role), additional_claims=additional_claims)
+                        update_access_token(user['id'], access_token, False)
                         return {
                             "channel": ["OSM","PATIENT"],
                             "thaid": user['national_id'],
-                            "roles": role
+                            "roles": role,
+                            "patient_access_token": access_token
                         }, 200 
     except Exception as e:
         return {"message": str(e)}, 500
