@@ -1,5 +1,7 @@
 import datetime
+import glob
 import os
+import shutil
 from flask import json, jsonify, current_app, request
 from flask_jwt_extended import get_jwt
 from werkzeug.utils import secure_filename
@@ -12,11 +14,11 @@ import tensorflow as tf
 import imageQualityChecker as image_quality_checker
 
 qualityChecker = image_quality_checker.ImageQualityChecker()
-
+session=[]
+user_data = get_jwt()
 def init_record(data,imageList):
     output = {}
-    session=[]
-    session['sender_mode'] = get_jwt()['channel']
+    session['sender_mode'] = user_data['channel']
     submission = data['is_submit']
     if request.method == 'POST':
         if data['is_rotate']=='true': # Rotate the image
@@ -63,8 +65,8 @@ def init_record(data,imageList):
                 session.pop('imageNameList', None)
             if imageName:
                 output['uploadedImage'] = imageName # Send back path of the last submitted image (if sent for more than 1)
-            if g.user['default_location']:
-                location = ast.literal_eval(g.user['default_location'])
+            if user_data['default_location']:
+                location = ast.literal_eval(user_data['default_location'])
                 if location['district']:
                     output['default_location_text'] = "สถานที่คัดกรอง: ตำบล"+location['district']+" อำเภอ"+location['amphoe']+" จังหวัด"+location['province']+" " +str(location['zipcode'])
                 else:
@@ -72,14 +74,14 @@ def init_record(data,imageList):
             else:
                 location = {'district': None,
                             'amphoe': None,
-                            'province': g.user['province'],
+                            'province': user_data['province'],
                             'zipcode': None}
                 output['default_location_text'] = "สถานที่คัดกรอง: จังหวัด"+location['province']
             output['earthchieAPI'] = True # enable Earthchie's Thailand Address Auto-complete API
         elif submission=='true': # upload confirmation is submitted
             # Check if submission list is in the queue (session), if so submit them to the Submission Module and the AI Prediction Engine
             if 'imageNameList' in session and session['imageNameList']:
-                if role=='patient':
+                if 'patient' in user_data['role']:
                     if request.form.get('inputPhone') is not None and request.form.get('inputPhone')!='':
                         session['sender_phone'] = request.form.get('inputPhone')
                     else:
@@ -90,7 +92,7 @@ def init_record(data,imageList):
                         session['sender_id'] = session['user_id']
                     else:
                         session['sender_id'] = None
-                if role=='osm':
+                if 'osm' in user_data['role']:
                     if request.form.get('inputIdentityID') is not None and request.form.get('inputIdentityID')!='':
                         session['patient_national_id'] = request.form.get('inputIdentityID')
                     else:
@@ -104,13 +106,13 @@ def init_record(data,imageList):
                 else:
                     session['location'] = {'district': None,
                                            'amphoe': None,
-                                           'province': g.user['province'],
+                                           'province': user_data['province'],
                                            'zipcode': None}
                 
                 upload_submission_module(target_user_id=session['user_id'])
 
                 lastImageName = list(session['imageNameList'])[-1]
-                db, cursor = get_db()
+                connection, cursor = db.get_db()
                 sql = "SELECT id FROM submission_record WHERE fname=%s"
                 val = (lastImageName, )
                 cursor.execute(sql, val)
@@ -118,11 +120,11 @@ def init_record(data,imageList):
                 result = result[-1] # The last image will be selected
                 #Clear submission queue in the session
                 session.pop('imageNameList', None)
-                if role=='patient':
+                if 'patient' in user_data['role']:
                     session.pop('sender_phone', None)
                     session.pop('sender_id', None)
                     session.pop('location', None)
-                elif role=='osm':
+                elif 'osm' in user_data['role']:
                     session.pop('patient_national_id', None)
                     session.pop('patient_id', None)
                     session.pop('location', None)
@@ -234,11 +236,11 @@ def upload_submission_module(target_user_id):
             
             if session['sender_mode']=='dentist':
                 
-                if g.user['default_location'] is None or str(g.user['default_location'])!=str(session['location']):
+                if user_data['default_location'] is None or str(user_data['default_location'])!=str(session['location']):
                     sql = "UPDATE user SET default_location=%s WHERE id=%s"
                     val = (str(session['location']), session['user_id'])
                     cursor.execute(sql, val)
-                    load_logged_in_user()
+                    # load_logged_in_user()
 
                 sql = '''INSERT INTO submission_record
                     (fname,
@@ -262,26 +264,25 @@ def upload_submission_module(target_user_id):
                        'DENTIST')
                 cursor.execute(sql, val)
 
-
             elif session['sender_mode']=='patient':
 
-                if g.user['default_location'] is None or str(g.user['default_location'])!=str(session['location']):
+                if user_data['default_location'] is None or str(user_data['default_location'])!=str(session['location']):
                     sql = "UPDATE user SET default_location=%s WHERE id=%s"
                     val = (str(session['location']), session['user_id'])
                     cursor.execute(sql, val)
-                    load_logged_in_user()
+                    # load_logged_in_user()
 
                 if 'sender_phone' in session and session['sender_phone']:
                     sql = "UPDATE user SET default_sender_phone=%s WHERE id=%s"
                     val = (session['sender_phone'], session['user_id'])
                     cursor.execute(sql, val)
-                    load_logged_in_user()
+                    # load_logged_in_user()
                 
-                if (g.user['default_sender_phone'] and ('sender_phone' not in session or session['sender_phone'] is None)):
+                if (user_data['default_sender_phone'] and ('sender_phone' not in session or session['sender_phone'] is None)):
                     sql = "UPDATE user SET default_sender_phone=NULL WHERE id=%s"
                     val = (session['user_id'], )
                     cursor.execute(sql, val)
-                    load_logged_in_user()
+                    # load_logged_in_user()
                 
                 sql = '''INSERT INTO submission_record 
                         (fname,
@@ -317,11 +318,11 @@ def upload_submission_module(target_user_id):
 
             elif session['sender_mode']=='osm':
 
-                if g.user['default_location'] is None or str(g.user['default_location'])!=str(session['location']):
+                if user_data['default_location'] is None or str(user_data['default_location'])!=str(session['location']):
                     sql = "UPDATE user SET default_location=%s WHERE id=%s"
                     val = (str(session['location']), session['user_id'])
                     cursor.execute(sql, val)
-                    load_logged_in_user()
+                    # load_logged_in_user()
 
                 sql = '''INSERT INTO submission_record 
                         (fname, 
@@ -427,3 +428,19 @@ def oral_lesion_prediction(imgPath):
     
     scores = [backgroundScore.numpy(), opmdScore.numpy(), osccScore.numpy()]
     return outlined_img, predictClass, scores, mask
+
+def rename_if_duplicated(uploadDir, checked_filename):
+
+    file_parts = os.path.splitext(checked_filename)
+    duplicate_files = glob.glob(os.path.join(uploadDir, file_parts[0] + '**'))
+    if len(duplicate_files)==0:
+        return checked_filename
+    else:
+        runningNumber = len(duplicate_files)
+
+    while (os.path.isfile(os.path.join(uploadDir, checked_filename))):
+        file_parts = os.path.splitext(checked_filename)
+        checked_filename = file_parts[0] + '' + str(runningNumber) + file_parts[1]
+        runningNumber+=1
+
+    return checked_filename

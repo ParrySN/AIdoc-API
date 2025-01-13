@@ -9,10 +9,19 @@ from flask_cors import CORS
 import db
 # from products import products_bp
 
-
 app = Flask(__name__, instance_relative_config=True)
 CORS(app) 
 
+# Create imageData/* folders
+projectDir = os.path.dirname(app.root_path)
+IMAGE_DATA_DIR = os.path.join(projectDir, 'imageData') 
+app.config['IMAGE_DATA_DIR'] = IMAGE_DATA_DIR
+os.makedirs(IMAGE_DATA_DIR, exist_ok=True)
+os.makedirs(os.path.join(IMAGE_DATA_DIR, 'temp'), exist_ok=True)
+os.makedirs(os.path.join(IMAGE_DATA_DIR, 'recycle'), exist_ok=True)
+os.makedirs(os.path.join(IMAGE_DATA_DIR, 'mask'), exist_ok=True)
+os.makedirs(os.path.join(IMAGE_DATA_DIR, 'upload', 'thumbnail'), exist_ok=True)
+os.makedirs(os.path.join(IMAGE_DATA_DIR, 'outlined', 'thumbnail'), exist_ok=True)
 app.config.from_pyfile('config.py', silent=True) # load the instance config
 # Configure JWT token
 app.config["JWT_SECRET_KEY"] = app.config.get('SECRET_KEY', 'SECRET_KEY')
