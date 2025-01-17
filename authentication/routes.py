@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import get_jwt, jwt_required,jwt_required, get_jwt
 
+from authentication import authentication
 from authentication.authentication import check_user_channel, login_with_passkey, revoke_token
 import db
 from .verify_passkey import verify_by_username_password, verify_by_thid_mobile
@@ -41,8 +42,20 @@ def hash_password():
     # Return response with current user data and hashed password
     return jsonify(user_data), 200
 
-@authentication_bp.route('/logout', methods=['POST'])
+@authentication_bp.route('/logout', methods=['PUT'])
 @jwt_required()
 def logout():
     output = revoke_token()
+    return output
+
+@authentication_bp.route('/register/<role>/', methods=['POST'])
+def post_register_by_role(role):
+    data = request.get_json()
+    if role == 'patient':
+        output = authentication.register_patient(data)
+    elif role == 'dentist':
+        output = authentication.register_dentist(data)
+    elif role == 'osm':
+        output = authentication.register_osm(data)
+
     return output

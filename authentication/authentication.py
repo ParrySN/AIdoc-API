@@ -1,6 +1,7 @@
-from flask import jsonify
+from flask import jsonify, request
 from flask_jwt_extended import get_jwt, decode_token
 
+from authentication import post_register_dentist, post_register_osm, post_register_patient
 from authentication.verify_passkey import verify_by_thid_mobile, verify_by_username_password
 import db
 from .verify_user import verify_user_from_aidoc, verify_user_from_questionnaire
@@ -50,3 +51,45 @@ def revoke_token():
         return jsonify({"msg": "Successfully logged out"}), 200
     except Exception as e:
         return jsonify({"message": str(e)}), 500
+    
+def register_patient(data):
+    required_fields = [
+        "name","surname","national_id","birthdate","sex","province"
+            ,"district","subdistrict","address","phone","job_position","zipcode"
+    ]
+
+    for field in required_fields:
+        if field not in data:
+            return jsonify({"error": f"Missing required field: {field}"}), 400
+    output = post_register_patient.post_patient(data)
+
+    return output
+
+def register_dentist(data):
+    required_fields = [
+        "name","surname","job_position","hospital","province","phone"
+            ,"email","username","password"
+    ]
+
+    for field in required_fields:
+        if field not in data:
+            return jsonify({"error": f"Missing required field: {field}"}), 400
+
+
+    output = post_register_dentist.post_dentist(data)
+
+    return output
+
+def register_osm(data):
+    required_fields = [
+        "name","surname","job_position","hospital","province","national_id","phone"
+    ]
+
+    for field in required_fields:
+        if field not in data:
+            return jsonify({"error": f"Missing required field: {field}"}), 400
+
+
+    output = post_register_osm.post_osm(data)
+
+    return output
