@@ -16,6 +16,9 @@ def update_access_token(user_id, access_token, is_revoke):
                 update_at = CURRENT_TIMESTAMP
             """
             cursor.execute(query, (user_id, jti, is_revoke))
+
+            sql = "UPDATE user SET last_login = NOW() WHERE id = %s"
+            cursor.execute(sql, (user_id,))
         return {"message": "Access token updated successfully"}, 200
     except Exception as e:
         return {"message": str(e)}, 500

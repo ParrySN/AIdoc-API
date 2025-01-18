@@ -55,7 +55,7 @@ def revoke_token():
 def register_patient(data):
     required_fields = [
         "name","surname","national_id","birthdate","sex","province"
-            ,"district","subdistrict","address","phone","job_position","zipcode"
+            ,"district","subdistrict","address","phone","job_position","zipcode","confirm_national_id"
     ]
 
     for field in required_fields:
@@ -67,14 +67,13 @@ def register_patient(data):
 
 def register_dentist(data):
     required_fields = [
-        "name","surname","job_position","hospital","province","phone"
-            ,"email","username","password"
+        "name","surname","job_position","hospital","province","phone","license"
+        ,"email","username","password","confirm_password","confirm_email"
     ]
 
     for field in required_fields:
         if field not in data:
             return jsonify({"error": f"Missing required field: {field}"}), 400
-
 
     output = post_register_dentist.post_dentist(data)
 
@@ -83,6 +82,7 @@ def register_dentist(data):
 def register_osm(data):
     required_fields = [
         "name","surname","job_position","hospital","province","national_id","phone"
+        ,"confirm_national_id","confirm_phone"
     ]
 
     for field in required_fields:
