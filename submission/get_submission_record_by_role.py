@@ -76,6 +76,8 @@ def fetch_total_count(cursor, data):
     query = """
         SELECT COUNT(*) as N
         FROM submission_record sr
+        LEFT JOIN patient_case_id pci ON sr.id=pci.id
+        LEFT JOIN followup_request fr ON sr.id=fr.submission_id
         LEFT JOIN user u1 ON sr.sender_id = u1.id
         LEFT JOIN user u2 ON sr.dentist_id = u2.id
         LEFT JOIN user u3 ON sr.patient_id = u3.id
