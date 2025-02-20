@@ -7,4 +7,15 @@ report_bp = Blueprint('report', __name__)
 @report_bp.route('/report/', methods=['GET'])
 def get_report():
     province = request.args.get('province')
-    return report.generate_report(province)
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')  
+    return report.generate_report(province,start_date,end_date)
+
+
+@report_bp.route('/summaries_by_day/', methods=['GET'])
+def get_summaries_by_day():
+    year = request.args.get('year')
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')     
+    province = request.args.get('province')
+    return report.summaries_by_day(year,start_date,end_date,province)

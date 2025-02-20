@@ -1,19 +1,19 @@
 import db
-import json
 from decimal import Decimal
 from common import common_mapper as cm
+from common import date_util as du
 
-def get_table(channel, province):
+def get_table(channel, province,start_date, end_date):
     connection, cursor = db.get_db()
     try:
         with cursor:
-            ai_predict_query, total_pic = fetch_ai_predictions_patient_osm_table(cursor, channel, province)
+            ai_predict_query, total_pic = fetch_ai_predictions_patient_osm_table(cursor, channel, province,start_date, end_date)
             ai_predict = cm.map_ai_prediction_list(ai_predict_query)
 
-            dentist_diagnose_query = fetch_dentist_feedback(cursor, channel, province)
+            dentist_diagnose_query = fetch_dentist_feedback(cursor, channel, province,start_date, end_date)
             dentist_diagnose = cm.map_dentist_diagnosis(dentist_diagnose_query)
 
-            diagnosed_submission_query = fetch_diagnosed_submission(cursor, channel, province)
+            diagnosed_submission_query = fetch_diagnosed_submission(cursor, channel, province,start_date, end_date)
             true_predict = calculate_true_predict(diagnosed_submission_query)
             sum_dent_diagnose = sum_dent_diagnose = sum(value for key, value in dentist_diagnose.items() if key in ['normal', 'opmd', 'oscc'])
             if sum_dent_diagnose == 0:
@@ -40,7 +40,8 @@ def get_table(channel, province):
     return output
 
 
-def fetch_ai_predictions_patient_osm_table(cursor, channel, province):
+def fetch_ai_predictions_patient_osm_table(cursor, channel, province, start, end):
+    start_date,end_date =du.check_date(cursor,start,end)
     
     query ="""
     SELECT ai_prediction_mapping.ai_prediction, COUNT(sr.ai_prediction) AS N
@@ -54,11 +55,13 @@ def fetch_ai_predictions_patient_osm_table(cursor, channel, province):
     LEFT JOIN submission_record sr
         ON sr.channel = %s 
         AND sr.ai_prediction = ai_prediction_mapping.ai_prediction
-        AND (%s IS NULL OR sr.location_province = %s)  
+        AND (%s IS NULL OR sr.location_province = %s)
+        AND sr.created_at >= %s
+        AND sr.created_at <= %s
     GROUP BY ai_prediction_mapping.ai_prediction
     ORDER BY ai_prediction_mapping.ai_prediction ASC;
     """
-    cursor.execute(query, (channel, province,province,))
+    cursor.execute(query, (channel,province,province,start_date,end_date))
 
     ai_predict_query = cursor.fetchall()
     total_pic = sum(item['N'] for item in ai_predict_query)
@@ -66,7 +69,8 @@ def fetch_ai_predictions_patient_osm_table(cursor, channel, province):
     return ai_predict_query, total_pic
 
 
-def fetch_dentist_feedback(cursor, channel, province):
+def fetch_dentist_feedback(cursor, channel, province, start, end):
+    start_date,end_date =du.check_date(cursor,start,end)
     query = """
     SELECT dentist_feedback_code_mapping.dentist_feedback_code, 
            COALESCE(SUM(submission_counts.N), 0) AS N
@@ -80,18 +84,21 @@ def fetch_dentist_feedback(cursor, channel, province):
                FROM submission_record sr 
                WHERE sr.channel = %s
                AND (%s IS NULL OR sr.location_province = %s)
+               AND sr.created_at >= %s
+               AND sr.created_at <= %s
             GROUP BY sr.dentist_feedback_code) AS submission_counts
     ON dentist_feedback_code_mapping.dentist_feedback_code = submission_counts.dentist_feedback_code
     OR (dentist_feedback_code_mapping.dentist_feedback_code = 'Not_diagnosed'
         AND submission_counts.dentist_feedback_code IS NULL)
     GROUP BY dentist_feedback_code_mapping.dentist_feedback_code;
         """
-    cursor.execute(query, (channel, province, province,))
+    cursor.execute(query, (channel, province, province,start_date,end_date))
 
     return cursor.fetchall()
 
 
-def fetch_diagnosed_submission(cursor, channel, province):
+def fetch_diagnosed_submission(cursor, channel, province,start, end):
+    start_date,end_date =du.check_date(cursor,start,end)
     query = """
         SELECT 
         ai_prediction, 
@@ -100,9 +107,11 @@ def fetch_diagnosed_submission(cursor, channel, province):
         WHERE sr.channel = %s
         AND (%s IS NULL OR sr.location_province = %s)  
         AND sr.dentist_feedback_code IS NOT NULL
-        AND sr.dentist_feedback_code IN ('NORMAL', 'OPMD', 'OSCC');
+        AND sr.dentist_feedback_code IN ('NORMAL', 'OPMD', 'OSCC')
+        AND sr.created_at >= %s
+        AND sr.created_at <= %s;
         """
-    cursor.execute(query, (channel, province, province,))
+    cursor.execute(query, (channel, province, province,start_date,end_date))
 
     return cursor.fetchall()
 
@@ -113,4 +122,3 @@ def calculate_true_predict(input_data):
         if prediction_mapping.get(item['ai_prediction']) == item['dentist_feedback_code']
     )
     return true_predict
-

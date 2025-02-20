@@ -2,7 +2,7 @@ import json
 import db
 
 
-def generate_provice_list():
+def generate_province_list():
     connection, cursor = db.get_db()
     try:
         with cursor:
