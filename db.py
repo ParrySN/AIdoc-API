@@ -9,7 +9,8 @@ def get_db():
             host=current_app.config['DB_HOST'],
             database=current_app.config['DB_DATABASE'],
             user=current_app.config['DB_USER'],
-            password=current_app.config['DB_PASSWORD']
+            password=current_app.config['DB_PASSWORD'],
+            port=current_app.config['DB_PORT']
         )
         g.db.autocommit = True
     
