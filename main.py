@@ -4,6 +4,7 @@ from report import report_bp
 from flask_swagger_ui import get_swaggerui_blueprint
 from flask_cors import CORS
 from record import record_bp
+from osm_submission import osm_submission_bp
 
 # from products import products_bp
 
@@ -30,6 +31,8 @@ app.register_blueprint(SWAGGERUI_BLUEPRINT, url_prefix=SWAGGER_URL)
 app.register_blueprint(report_bp, url_prefix='/')
 
 app.register_blueprint(record_bp, url_prefix='/')
+
+app.register_blueprint(osm_submission_bp, url_prefix='/')
 app.json.ensure_ascii=False
 
 if __name__ == '__main__':
