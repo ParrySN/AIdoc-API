@@ -62,17 +62,6 @@ def generate_summaries_by_day(year=None,start_date=None,end_date=None, province=
     return output_data
 
 def filter_by_date_range(data, start_date=None, end_date=None):
-    """
-    Filter objects based on date range.
-    
-    Args:
-        data (list): List of dictionaries containing 'date' and 'count'
-        start_date (str): Start date in format 'YYYY-MM-DD'
-        end_date (str): End date in format 'YYYY-MM-DD'
-    
-    Returns:
-        list: Filtered list of dictionaries
-    """
     # If no dates provided, return original data
     if not start_date and not end_date:
         return data
@@ -106,16 +95,6 @@ def filter_by_date_range(data, start_date=None, end_date=None):
     return filtered_data
 
 def filter_by_year(data, year=None):
-    """
-    Filter objects based on a specific year.
-    
-    Args:
-        data (list): List of dictionaries containing 'date' and 'count'.
-        year (int): Year to filter data.
-    
-    Returns:
-        list: Filtered list of dictionaries.
-    """
     if not year:
         return data  # If no year is specified, return unfiltered data.
 

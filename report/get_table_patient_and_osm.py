@@ -33,7 +33,7 @@ def get_table(channel, province,start_date, end_date):
         output = {
             "accuracy": "-",
             "ai_predict": {"normal": 0, "opmd": 0, "oscc": 0},
-            "dentist_diagnose": {"normal": 0, "not_diagnosed": 0, "opmd": 0, "oscc": 0, "others": 0, "poor_image": 0},
+            "dentist_diagnose": {"normal": 0, "not_diagnosed": 0, "opmd": 0, "oscc": 0, "others": 0, "poor_image": 0,"benign": 0},
             "total_pic": 0
         }
 
@@ -78,7 +78,8 @@ def fetch_dentist_feedback(cursor, channel, province, start, end):
           UNION ALL SELECT 'OPMD' 
           UNION ALL SELECT 'Normal' 
           UNION ALL SELECT 'BAD_IMG' 
-          UNION ALL SELECT 'OTHER' 
+          UNION ALL SELECT 'OTHER'
+          UNION ALL SELECT 'BENIGN'
           UNION ALL SELECT 'Not_diagnosed') AS dentist_feedback_code_mapping
     LEFT JOIN (SELECT dentist_feedback_code, COUNT(*) as N
                FROM submission_record sr 
