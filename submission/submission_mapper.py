@@ -1,5 +1,6 @@
 import common.common_mapper as cm
 import common.date_util as du
+
 def map_user_list_data(data):
     user_list = []
 
@@ -30,7 +31,7 @@ def map_user_list_data(data):
 
     return user_list
 
-def map_image_manage_list_data(data):
+def map_submission_record_image(data):
     image_manage_list = []
     for row in data:
         if row['birthdate'] is not None:

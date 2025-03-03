@@ -7,7 +7,6 @@ from flask_jwt_extended import get_jwt
 import db
 from submission.submission_mapper import map_dentist_send_list_data, map_submission_record_image
 
-
 def get_submission_record(data):
     connection, cursor = db.get_db()
     try:
@@ -245,18 +244,7 @@ def build_conditions(data):
         end_date = data['end_date']
         conditions.append("DATE(sr.created_at) <= %s")
         params.append(end_date)
-    # # Role filter
-    # if (g.user['is_patient']==1 and session['login_mode']=='patient') or (g.user['is_osm']==1 and session['login_mode']=='osm'):
-    #     conditions.append("sr.patient_id = %s OR sr.sender_id = %s")
-    #     params.append(g.user['id'])
-    #     params.append(g.user()['id'])
-    # elif g.user['is_specialist']==1 and session['login_mode']=='dentist':
-    #     conditions.append("sr.sender_id = %s")
-    #     params.append(g.user()['id'])
-    # elif g.user['is_specialist']==0 and session['login_mode']=='dentist':
-    #     conditions.append("sr.sender_id = %s")
-    #     params.append(g.user()['id'])
-
+        
     # Role filter
     if "admin" not in user_role:
         if "patient" in user_role and channel == "patient":
