@@ -95,32 +95,35 @@ def register_osm(data):
     return output
 
 def risk_oca_status():
-    claims = get_jwt()
-    print(claims)
-    user_id = claims['id']
-    name = claims['name']
-    surname = claims['surname']
     db.close_db()
+    claims = get_jwt()
+
+    national_id = claims.get('national_id', '').strip()
+
+    if not national_id:
+        return jsonify({"error": "National ID is required"}), 400
+
     connection, cursor = db.get_db_2()
+
     try:
         with cursor:
             query = """
             SELECT 
-                *
+                * 
             FROM 
-                questionnaire
+                questionnaire 
             WHERE 
                 cid = %s
-                OR (
-                    name LIKE %s
-                    AND name LIKE %s
-                )
-            ORDER BY id DESC
             """
-            cursor.execute(query, (user_id, f"%{name}%", f"%{surname}%"))
+            cursor.execute(query, (national_id,))
             result = cursor.fetchone()
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     finally:
         db.close_db()
+    if not result:
+        return jsonify({"error": "No records found"}), 404  
+
     return jsonify(result), 200
+
+
