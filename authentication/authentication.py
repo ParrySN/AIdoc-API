@@ -114,6 +114,7 @@ def risk_oca_status():
                 questionnaire 
             WHERE 
                 cid = %s
+            LIMIT 1
             """
             cursor.execute(query, (national_id,))
             result = cursor.fetchone()
