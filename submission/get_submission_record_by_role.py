@@ -247,11 +247,11 @@ def build_conditions(data):
         
     # Role filter
     if "admin" not in user_role:
-        if "patient" in user_role and channel == "patient":
+        if "patient" in user_role and channel == "PATIENT":
             conditions.append("sr.patient_id = %s OR sr.sender_id = %s")
             params.append(get_jwt()['id'])
             params.append(get_jwt()['id'])
-        elif "osm" in user_role and channel == "osm":
+        elif "osm" in user_role and channel == "OSM":
             if data.get('user_id'):
                 conditions.append("sr.patient_id = %s AND sr.sender_id = %s")
                 params.append(data['user_id'])
@@ -260,10 +260,10 @@ def build_conditions(data):
                 conditions.append("sr.sender_id = %s OR sr.patient_id = %s")
                 params.append(get_jwt()['id'])
                 params.append(get_jwt()['id'])
-        elif "specialist" in user_role and channel == "dentist":
+        elif "specialist" in user_role and channel == "DENTIST":
             conditions.append("sr.sender_id = %s")
             params.append(get_jwt()['id'])
-    elif "admin" in user_role and channel == "dentist":
+    elif "admin" in user_role and channel == "DENTIST":
         if data.get('user_id'):
             conditions.append("sr.sender_id = %s")
             params.append(data['user_id'])
