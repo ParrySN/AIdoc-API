@@ -1,10 +1,45 @@
 import common.common_mapper as cm
 import common.date_util as du
+def map_user_list_data(data):
+    user_list = []
+
+    for row in data:
+        user = {
+            "id": row["id"],
+            "name": row["name"],
+            "surname": row["surname"],
+            "email": row["email"] if row["email"] else "None",
+            "province": row["province"],
+            "job_position": cm.map_job_position_to_th(row["job_position"]),
+            "role": [],
+            "total_submit": row["N"],
+            "last_login": du.format_date_to_ddMMyyyy_time(row["last_login"]) if row["last_login"] else "-"
+        }
+
+
+        if row["is_patient"] == 1:
+            user["role"].append("patient")
+        if row["is_osm"] == 1:
+            user["role"].append("osm")
+        if row["is_specialist"] == 1:
+            user["role"].append("specialist")
+        if row["is_admin"] == 1:
+            user["role"].append("admin")
+
+        user_list.append(user)
+
+    return user_list
+
 def map_image_manage_list_data(data):
     image_manage_list = []
     for row in data:
+        if row['birthdate'] is not None:
+            age = du(row['birthdate'])
+        else:
+            age = None
         image = {
-            "submission_id": row['id'],
+            "submission_id": row['submission_id'],
+            "case_id": row['case_id'],
             "file_name": row['fname'],
             "submission_date": du.format_date_to_ddMMyyyy_time(row['created_at']),
             "ai_prediction": cm.map_ai_prediction_int(row['ai_prediction']).upper(),
@@ -17,9 +52,18 @@ def map_image_manage_list_data(data):
             "dentist_name": row['dentist_name'],
             "dentist_surname": row['dentist_surname'],
             "dentist_comment": row['dentist_feedback_comment'],
+            "dentist_feedback": row['dentist_feedback_code'],
+            "age": age,
             "national_id": row['national_id'],
             "sender_job": cm.map_job_position_to_th(row['job_position']),
-            "sender_id": row['sender_id']
+            "sender_id": row['sender_id'],
+            "channel": row['channel'],
+            "followup": row['followup_id'],
+            "retrain": row['retrain_id'],
+            "patient_fullname":f"{row['patient_name']} {row['patient_surname']}" if row['patient_name'] and row['patient_surname'] else "ไม่มีข้อมูล",
+            "dentist_hospital": f"{row['hospital']}" if row['hospital'] else "ไม่มีข้อมูล",
+            "followup_request_status": row['followup_request_status'],
+            "retrain_request_status": row['retrain_request_status']
         }
         image_manage_list.append(image)
 
