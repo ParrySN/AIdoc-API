@@ -18,7 +18,7 @@ def get_db():
 def get_db_2():
     if 'db' not in g:
         g.db = mysql.connector.connect(
-            host=current_app.config['DB_HOST_2'],
+            host=current_app.config['DB_HOST'],
             database=current_app.config['DB_DATABASE_2'],
             user=current_app.config['DB_USER'],
             password=current_app.config['DB_PASSWORD']

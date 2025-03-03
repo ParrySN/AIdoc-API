@@ -59,3 +59,9 @@ def post_register_by_role(role):
         output = authentication.register_osm(data)
 
     return output
+
+@authentication_bp.route('/risk_oca_status/', methods=['GET'])
+@jwt_required()
+def get_risk_oca_status():
+    output = authentication.risk_oca_status()
+    return output

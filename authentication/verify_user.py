@@ -3,7 +3,6 @@ from flask import jsonify
 from flask_jwt_extended import create_access_token, decode_token
 from common.common_mapper import map_role_to_list
 import db
-import pymysql
 
 def verify_user_from_aidoc(key):
     connection,cursor = db.get_db()

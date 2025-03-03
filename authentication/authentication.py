@@ -93,3 +93,34 @@ def register_osm(data):
     output = post_register_osm.post_osm(data)
 
     return output
+
+def risk_oca_status():
+    claims = get_jwt()
+    print(claims)
+    user_id = claims['id']
+    name = claims['name']
+    surname = claims['surname']
+    db.close_db()
+    connection, cursor = db.get_db_2()
+    try:
+        with cursor:
+            query = """
+            SELECT 
+                *
+            FROM 
+                questionnaire
+            WHERE 
+                cid = %s
+                OR (
+                    name LIKE %s
+                    AND name LIKE %s
+                )
+            ORDER BY id DESC
+            """
+            cursor.execute(query, (user_id, f"%{name}%", f"%{surname}%"))
+            result = cursor.fetchone()
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        db.close_db()
+    return jsonify(result), 200
